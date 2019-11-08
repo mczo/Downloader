@@ -11,7 +11,8 @@ import Combine
 
 struct DLListDownloading: View {
     @Binding var taskList: [DLTaskGenre]
-    @State private var spin: Bool = false
+    
+    @ObservedObject private var circle = AnimationCircle()
     
     var body: some View {
         ForEach(taskList) {
@@ -21,13 +22,10 @@ struct DLListDownloading: View {
                 HStack {
                     VStack {
                         if item.status == DLStatus.wait {
-                            Circle()
+                            Circle(startAngleRadians: self.circle.startAngleRadians,
+                                   endAngleRadians: self.circle.endAngleRadians)
+                                .rotation(Angle(degrees: self.circle.currentAngle))
                                 .fill(Color.gray)
-                                .rotationEffect(.degrees(self.spin ? 360: 0))
-                                .animation(Animation.linear(duration: 1.1).repeatForever(autoreverses: false))
-                                .onAppear() {
-                                    self.spin.toggle()
-                                }
                         } else {
                             ZStack {
                                 ProgressButtonCircle(endAngleRadians: item.process)
@@ -48,12 +46,7 @@ struct DLListDownloading: View {
 
                     
                     VStack {
-                        HStack {
-                            Text(item.file!.name)
-                                .modifier(DLCompositionTitle())
-                            
-                            Spacer()
-                        }
+//                        Text((item as! DownloadTask).file?.name)
                         
                         HStack {
                             Text("100kb")
@@ -66,7 +59,6 @@ struct DLListDownloading: View {
                     }
                 }
             }
-//        .onReceive(<#T##publisher: Publisher##Publisher#>, perform: <#T##(Publisher.Output) -> Void#>)
         }
     }
 }
@@ -87,11 +79,31 @@ extension DLTaskGenre {
 }
 
 
+fileprivate class AnimationCircle: ObservableObject {
+    var cancellable: AnyCancellable?
+    
+    private(set) var startAngleRadians: CGFloat = -CGFloat.pi / 2
+    private(set) var endAngleRadians: CGFloat = 10 * CGFloat.pi
+    private(set) var progressStartAngleRadians: CGFloat = -90
+    private(set) var progressEndAngleRadians: CGFloat = 270
+    
+    @Published var currentAngle: Double = 0
+    
+    init() {
+        cancellable = Timer.publish(every: 0.01, on: .main, in: .common)
+            .autoconnect()
+            .sink() {
+                _ in
+                
+                self.currentAngle += 1
+            }
+    }
+}
 
 fileprivate struct Circle: Shape, Animatable {
     var lineWidth: CGFloat = 2
-    var startAngleRadians: CGFloat = -CGFloat.pi / 2
-    var endAngleRadians: CGFloat = 10 * CGFloat.pi
+    var startAngleRadians: CGFloat
+    var endAngleRadians: CGFloat
 
     func path(in rect: CGRect) -> Path {
         var p = Path()
