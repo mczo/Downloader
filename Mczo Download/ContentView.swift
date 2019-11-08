@@ -12,22 +12,21 @@ struct ContentView: View {
     @State private var selection = 0
  
     var body: some View {
-        TabView(selection: $selection){
-            Text("First View")
-                .font(.title)
+        TabView(selection: $selection) {
+            DLList()
                 .tabItem {
                     VStack {
-                        Image("first")
-                        Text("First")
+                        Image(systemName: "square.and.arrow.down")
+                        Text("下载")
                     }
                 }
                 .tag(0)
-            Text("Second View")
-                .font(.title)
+            
+            SettingMain()
                 .tabItem {
                     VStack {
-                        Image("second")
-                        Text("Second")
+                        Image(systemName: "gear")
+                        Text("设置")
                     }
                 }
                 .tag(1)
