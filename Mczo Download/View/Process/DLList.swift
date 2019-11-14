@@ -12,7 +12,7 @@ struct DLList: View {
     @State private var selection: DLStatus = .downloading
     @State private var DLAddPresented: Bool = false
     
-    @State var taskList: [DLTaskGenre] = Array()
+    @ObservedObject var downloadingManage: DownloadingManage = DownloadingManage()
     
     private var selectionView: some View {
         Section {
@@ -32,7 +32,7 @@ struct DLList: View {
                 selectionView
                 
                 if selection == DLStatus.downloading {
-                    DLListDownloading(taskList: self.$taskList)
+                    DLListDownloading(downloadingManage: downloadingManage)
                 }
             }
             .navigationBarTitle("下载", displayMode: .automatic)
@@ -52,11 +52,20 @@ struct DLList: View {
                 isPresented: self.$DLAddPresented,
                 onDismiss: {},
                 content: {
-                    DLAdd(DLAddPresented: self.$DLAddPresented, taskList: self.$taskList)
+                    DLAdd(DLAddPresented: self.$DLAddPresented, downloadingManage: self.downloadingManage)
                 }
             )
         }
     }
+}
+
+
+enum DLStatus: Int {
+    case wait
+    case downloading
+    case pause
+    case complete
+    case failure
 }
 
 struct DLCompositionTitle: ViewModifier {
@@ -74,17 +83,44 @@ struct DLCompositionDescription: ViewModifier {
     }
 }
 
-
-struct DLList_Previews: PreviewProvider {
-    static var previews: some View {
-        DLList()
+extension Int64 {
+    var btySize: String {
+        var unit: String
+        var val: Int16
+        
+        switch self {
+        case let b where b >= 0:
+            unit = "B"
+            val = Int16(self)
+        case let kb where kb >= 1000:
+            unit = "KB"
+            val = Int16(kb / 1000)
+        case let MB where MB >= 1000000:
+            unit = "MB"
+            val = Int16(MB / 1000000)
+        case let GB where GB >= 1000000000:
+            unit = "GB"
+            val = Int16(GB / 1000000000)
+        default:
+            return ""
+        }
+        
+        return "\(String(val)) \(String(unit))"
     }
-}
+    
+    var timeDec: String {
+        switch self {
+        case let s where s > 0:
+            return "\(s) 秒"
+        case let m where m >= 60:
+            return "\(Int16(m / 60)) 分"
+        case let h where h >= 3600:
+            return "\(Int16(h / 3600)) 小时"
+        case let d where d >= 86400:
+            return "\(Int16(d / 86400)) 天"
+        default:
+            return ""
+        }
+    }
 
-enum DLStatus: Int {
-    case wait
-    case downloading
-    case pause
-    case complete
-    case failure
 }

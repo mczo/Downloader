@@ -7,7 +7,6 @@
 //
 
 import Foundation
-import Combine
 
 enum DownloadError: Error {
     case notNetwork
@@ -24,8 +23,8 @@ struct File: FileProtocol {
     let url: URL
     let name: String
     let mime: String
-    let size: Int
-    var threads: [[Int]]
+    let size: Int64
+    var threads: [[Int64]]
     let save: URL
 //    let ext: String
     var full: URL {
@@ -37,26 +36,25 @@ protocol FileProtocol {
     var url: URL { get }
     var name: String { get }
     var mime: String { get }
-    var size: Int { get }
-    var threads: [[Int]] { get set }
+    var size: Int64 { get }
+    var threads: [[Int64]] { get set }
     var save: URL { get }
 }
 
-class DownloadTask: ObservableObject {
+class DownloadTask {
     fileprivate lazy var saveDir: URL = try! FileManager.default.url(for: .downloadsDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
     fileprivate lazy var session: URLSession = URLSession.shared
     
-    @Published var file: File?
+    var file: File?
     
     var threads: [DownloadThread] = Array()
     private var downloadFileManage: DownloadFileManage?
     
-    @Published var status: DLStatus?
-    let successPublisher: PassthroughSubject = PassthroughSubject<Void, Never>()
+    var status: DLStatus?
     
-    fileprivate var shard: Int8!
-    fileprivate var title: String!
-    fileprivate var url: String!
+    var shard: Int8!
+    var title: String!
+    var url: String!
     init(url urlString: String, title: String, shard: Int8) {
         self.shard = shard
         self.title = title
@@ -92,12 +90,12 @@ class DownloadTask: ObservableObject {
                         return
                     }
                 
-                var threads: [[Int]] = Array()
-                let size: Int = Int(res.value(forHTTPHeaderField: "Content-Length")!)!
-                let blockSize: Int = size / Int(self.shard)
+                var threads: [[Int64]] = Array()
+                let size: Int64 = Int64(res.value(forHTTPHeaderField: "Content-Length")!)!
+                let blockSize: Int64 = size / Int64(self.shard)
                 for threadId in 0..<self.shard {
-                    var startSeed: Int = Int(threadId) * blockSize,
-                        endSeed:Int = Int(threadId + 1) * blockSize - 1
+                    var startSeed: Int64 = Int64(threadId) * blockSize,
+                        endSeed: Int64 = Int64(threadId + 1) * blockSize - 1
                     if threadId == self.shard - 1 {
                         endSeed = size - 1
                     }
@@ -162,8 +160,9 @@ class DownloadThread: NSObject, DownloadProtocol {
     var request: URLRequest
     var task: URLSessionDownloadTask?
     var file: File
-    let seeks: [Int]
+    let seeks: [Int64]
     
+    var bytesWritten: Int64?
     var totalBytesWritten: Int64?
     var totalBytesExpectedToWrite: Int64?
     var process: Float {
@@ -211,6 +210,7 @@ extension DownloadThread: URLSessionDownloadDelegate {
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
         if downloadTask == self.task {
+            self.bytesWritten = bytesWritten
             self.totalBytesWritten = totalBytesWritten
             self.totalBytesExpectedToWrite = totalBytesExpectedToWrite
         }
@@ -236,10 +236,10 @@ class DownloadFileManage {
             return
         }
         
-        let _: Bool = fileManager.createFile(atPath: file.full.path, contents: Data(count: file.size), attributes: nil)
+        let _: Bool = fileManager.createFile(atPath: file.full.path, contents: Data(count: Int(file.size)), attributes: nil)
     }
     
-    func write(seek: Int, data: Data) {
+    func write(seek: Int64, data: Data) {
         writingFile?.seek(toFileOffset: UInt64(seek))
         writingFile?.write(data)
     }

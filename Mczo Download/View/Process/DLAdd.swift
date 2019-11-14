@@ -10,9 +10,9 @@ import SwiftUI
 
 struct DLAdd: View {
     @Binding var DLAddPresented: Bool
-    @Binding var taskList: [DLTaskGenre]
     
     @ObservedObject private var globalSetting: GlobalSettings = GlobalSettings()
+    @ObservedObject var downloadingManage: DownloadingManage
     
     @State private var formURL: String = "https://d1.music.126.net/dmusic/8962/2019827153711/NeteaseMusic_2.2.0_800_web.dmg"
     @State private var formTitle: String = String()
@@ -39,7 +39,7 @@ struct DLAdd: View {
                     
                     do {
                         try downloading.header()
-                        self.taskList.append(downloading)
+                        self.downloadingManage.list.append(downloading)
                         downloading.start()
                         
                         self.formTitle = String()

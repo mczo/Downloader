@@ -10,100 +10,140 @@ import SwiftUI
 import Combine
 
 struct DLListDownloading: View {
-    @Binding var taskList: [DLTaskGenre]
+    @State private var spin: Bool = false
     
-    @ObservedObject private var circle = AnimationCircle()
+    @ObservedObject var downloadingManage: DownloadingManage
     
     var body: some View {
-        ForEach(taskList) {
+        ForEach(downloadingManage.list) {
             item in
-                        
+        
             NavigationLink(destination: Text("a")) {
-                HStack {
-                    VStack {
-                        if item.status == DLStatus.wait {
-                            Circle(startAngleRadians: self.circle.startAngleRadians,
-                                   endAngleRadians: self.circle.endAngleRadians)
-                                .rotation(Angle(degrees: self.circle.currentAngle))
-                                .fill(Color.gray)
-                        } else {
-                            ZStack {
-                                ProgressButtonCircle(endAngleRadians: item.process)
-                                    .fill(Color.blue)
-                                
-                                Group {
-                                    if item.status == DLStatus.downloading {
-                                        Image(systemName: "stop.fill")
-                                    } else if item.status == DLStatus.pause {
-                                        Image(systemName: "play.fill")
-                                    }
-                                }
-                                .foregroundColor(.blue)
-                            }
-                        }
-                    }
-                    .frame(width: 45, height: 45)
-
-                    
-                    VStack {
-//                        Text((item as! DownloadTask).file?.name)
-                        
-                        HStack {
-                            Text("100kb")
-                            
-                            Spacer()
-                            
-                            Text("剩余1分钟")
-                        }
-                        .modifier(DLCompositionDescription())
-                    }
-                }
+                Text("aa\((item as DLTaskGenre).process) \((item as DLTaskGenre).speed) \((item as DLTaskGenre).time)")
+//                HStack {
+//                    VStack {
+//                        if item.status == DLStatus.wait {
+//                            Circle()
+//                                .fill(Color.gray)
+//                                .rotationEffect(.degrees(self.spin ? 360: 0))
+//                                .animation(Animation.linear(duration: 1.1).repeatForever(autoreverses: false))
+//                                .onAppear() {
+//                                    self.spin.toggle()
+//                                }
+//                        } else {
+//                            ZStack {
+//                                ProgressButtonCircle(endAngleRadians: item.process)
+//                                    .fill(Color.blue)
+//
+//                                Group {
+//                                    if item.status == DLStatus.downloading {
+//                                        Image(systemName: "stop.fill")
+//                                    } else if item.status == DLStatus.pause {
+//                                        Image(systemName: "play.fill")
+//                                    }
+//                                }
+//                                .foregroundColor(.blue)
+//                            }
+//                        }
+//                    }
+//                    .frame(width: 45, height: 45)
+//
+//
+//                    VStack {
+//                        HStack {
+//                            Text(item.file!.name)
+//                                .modifier(DLCompositionTitle())
+//
+//                            Spacer()
+//                        }
+//
+//                        HStack {
+//                            Text(item.speed.btySize)
+//
+//                            Spacer()
+//
+//                            Text(item.time.timeDec)
+//                        }
+//                        .modifier(DLCompositionDescription())
+//                    }
+//                }
             }
         }
+    }
+}
+
+
+
+class DownloadingManage: ObservableObject {
+    @Published var list: [DLTaskGenre] = []
+    
+    init() {
+        
     }
 }
 
 class DLTaskGenre: DownloadTask, Identifiable {
     var id: UUID = UUID()
-}
-
-extension DLTaskGenre {
-    var process: CGFloat {
-        get {
-            let total: Float = threads.reduce(0) { $0 + $1.process }
-            let proportion: Float = total / Float(threads.count)
-
-            return CGFloat(proportion * 3.6 - 90)
-        }
-    }
-}
-
-
-fileprivate class AnimationCircle: ObservableObject {
-    var cancellable: AnyCancellable?
+    @Published var cancellable: AnyCancellable?
     
-    private(set) var startAngleRadians: CGFloat = -CGFloat.pi / 2
-    private(set) var endAngleRadians: CGFloat = 10 * CGFloat.pi
-    private(set) var progressStartAngleRadians: CGFloat = -90
-    private(set) var progressEndAngleRadians: CGFloat = 270
+    @Published var process: CGFloat = -90
+    @Published var speed: Int64 = -1
+    @Published var time: Int64 = -1
     
-    @Published var currentAngle: Double = 0
-    
-    init() {
-        cancellable = Timer.publish(every: 0.01, on: .main, in: .common)
+    override func start() {
+        super.start()
+        
+        cancellable = Timer.publish(every: 1, on: .main, in: .common)
             .autoconnect()
             .sink() {
                 _ in
-                
-                self.currentAngle += 1
+
+                self.process = self.getProcess()
+                self.speed = self.getSpeed()
+                self.time = self.getTime()
             }
+        
+    }
+}
+
+extension DLTaskGenre {
+    func getProcess() -> CGFloat {
+        let total: Float = threads.reduce(0) { $0 + $1.process }
+        let proportion: Float = total / Float(threads.count)
+
+        return CGFloat(proportion * 3.6 - 90)
+    }
+    
+    func getSpeed() -> Int64 {
+        let total: Int64 = threads.reduce(0) {
+            all, current in
+            
+            guard let bytesWritten = current.bytesWritten else { return all }
+            return all + bytesWritten
+        }
+        return total
+    }
+    
+    func getTime() -> Int64 {
+        if speed == 0 {
+            return 123123
+        }
+        
+        var totalBytesWritten: Int64 = 0
+        for thread in threads {
+            if let size = thread.totalBytesWritten {
+                totalBytesWritten += size
+            }
+        }
+        
+        return (Int64(file!.size) - totalBytesWritten) / speed
     }
 }
 
 fileprivate struct Circle: Shape, Animatable {
     var lineWidth: CGFloat = 2
-    var startAngleRadians: CGFloat
-    var endAngleRadians: CGFloat
+    var startAngleRadians: CGFloat = -CGFloat.pi / 2
+    var endAngleRadians: CGFloat = 10 * CGFloat.pi
 
     func path(in rect: CGRect) -> Path {
         var p = Path()
