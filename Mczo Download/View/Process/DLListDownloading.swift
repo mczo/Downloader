@@ -19,54 +19,53 @@ struct DLListDownloading: View {
             item in
         
             NavigationLink(destination: Text("a")) {
-                Text("aa\((item as DLTaskGenre).process) \((item as DLTaskGenre).speed) \((item as DLTaskGenre).time)")
-//                HStack {
-//                    VStack {
-//                        if item.status == DLStatus.wait {
-//                            Circle()
-//                                .fill(Color.gray)
-//                                .rotationEffect(.degrees(self.spin ? 360: 0))
-//                                .animation(Animation.linear(duration: 1.1).repeatForever(autoreverses: false))
-//                                .onAppear() {
-//                                    self.spin.toggle()
-//                                }
-//                        } else {
-//                            ZStack {
-//                                ProgressButtonCircle(endAngleRadians: item.process)
-//                                    .fill(Color.blue)
-//
-//                                Group {
-//                                    if item.status == DLStatus.downloading {
-//                                        Image(systemName: "stop.fill")
-//                                    } else if item.status == DLStatus.pause {
-//                                        Image(systemName: "play.fill")
-//                                    }
-//                                }
-//                                .foregroundColor(.blue)
-//                            }
-//                        }
-//                    }
-//                    .frame(width: 45, height: 45)
-//
-//
-//                    VStack {
-//                        HStack {
-//                            Text(item.file!.name)
-//                                .modifier(DLCompositionTitle())
-//
-//                            Spacer()
-//                        }
-//
-//                        HStack {
-//                            Text(item.speed.btySize)
-//
-//                            Spacer()
-//
-//                            Text(item.time.timeDec)
-//                        }
-//                        .modifier(DLCompositionDescription())
-//                    }
-//                }
+                HStack {
+                    VStack {
+                        if item.status == DLStatus.wait {
+                            Circle()
+                                .fill(Color.gray)
+                                .rotationEffect(.degrees(self.spin ? 360: 0))
+                                .animation(Animation.linear(duration: 1.1).repeatForever(autoreverses: false))
+                                .onAppear() {
+                                    self.spin.toggle()
+                                }
+                        } else {
+                            ZStack {
+                                ProgressButtonCircle(endAngleRadians: item.process)
+                                    .fill(Color.blue)
+
+                                Group {
+                                    if item.status == DLStatus.downloading {
+                                        Image(systemName: "stop.fill")
+                                    } else if item.status == DLStatus.pause {
+                                        Image(systemName: "play.fill")
+                                    }
+                                }
+                                .foregroundColor(.blue)
+                            }
+                        }
+                    }
+                    .frame(width: 45, height: 45)
+
+
+                    VStack {
+                        HStack {
+                            Text(item.file!.name)
+                                .modifier(DLCompositionTitle())
+
+                            Spacer()
+                        }
+
+                        HStack {
+                            Text(item.speed.btySize)
+
+                            Spacer()
+
+                            Text(item.time.timeDec)
+                        }
+                        .modifier(DLCompositionDescription())
+                    }
+                }
             }
         }
     }
@@ -75,68 +74,63 @@ struct DLListDownloading: View {
 
 
 class DownloadingManage: ObservableObject {
+    private var cancellable: AnyCancellable?
+    
     @Published var list: [DLTaskGenre] = []
     
     init() {
-        
+        cancellable = Timer.publish(every: 1, on: .main, in: .common)
+        .autoconnect()
+        .sink() {
+            _ in
+            
+            self.list = self.list
+        }
     }
 }
 
 class DLTaskGenre: DownloadTask, Identifiable {
     var id: UUID = UUID()
-    @Published var cancellable: AnyCancellable?
-    
-    @Published var process: CGFloat = -90
-    @Published var speed: Int64 = -1
-    @Published var time: Int64 = -1
-    
-    override func start() {
-        super.start()
-        
-        cancellable = Timer.publish(every: 1, on: .main, in: .common)
-            .autoconnect()
-            .sink() {
-                _ in
-
-                self.process = self.getProcess()
-                self.speed = self.getSpeed()
-                self.time = self.getTime()
-            }
-        
-    }
+    private var prevTotalBytesWritten: Int64 = 0
 }
 
 extension DLTaskGenre {
-    func getProcess() -> CGFloat {
-        let total: Float = threads.reduce(0) { $0 + $1.process }
-        let proportion: Float = total / Float(threads.count)
+    var process: CGFloat {
+        get {
+            let total: Float = threads.reduce(0) { $0 + $1.process }
+            let proportion: Float = total / Float(threads.count)
+    
+            return CGFloat(proportion * 3.6 - 90)
+        }
+    }
+    
+    var speed: Int64 {
+        get {
+            let currentTotalBytesWritten: Int64 = threads.reduce(0) {
+                all, current in
 
-        return CGFloat(proportion * 3.6 - 90)
-    }
-    
-    func getSpeed() -> Int64 {
-        let total: Int64 = threads.reduce(0) {
-            all, current in
-            
-            guard let bytesWritten = current.bytesWritten else { return all }
-            return all + bytesWritten
-        }
-        return total
-    }
-    
-    func getTime() -> Int64 {
-        if speed == 0 {
-            return 123123
-        }
-        
-        var totalBytesWritten: Int64 = 0
-        for thread in threads {
-            if let size = thread.totalBytesWritten {
-                totalBytesWritten += size
+                guard let totalBytesWritten = current.totalBytesWritten else { return -1 }
+                return all + totalBytesWritten
             }
+            let currentSpeed: Int64 = currentTotalBytesWritten - prevTotalBytesWritten
+            prevTotalBytesWritten = currentTotalBytesWritten
+            return currentSpeed
         }
-        
-        return (Int64(file!.size) - totalBytesWritten) / speed
+    }
+
+    var time: Int64 {
+        get {
+            var totalTime: Int64 = 0
+            for thread in threads {
+                guard let totalBytesExpectedToWrite = thread.totalBytesExpectedToWrite else { break }
+                guard let totalBytesWritten = thread.totalBytesWritten else { break }
+                guard let bytesWritten = thread.bytesWritten else { break }
+                
+                totalTime += (totalBytesExpectedToWrite - totalBytesWritten) / bytesWritten
+            }
+
+            return totalTime
+        }
     }
 }
 
@@ -175,3 +169,5 @@ fileprivate struct ProgressButtonCircle: Shape {
         return p.strokedPath(style)
     }
 }
+
+

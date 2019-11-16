@@ -89,18 +89,17 @@ extension Int64 {
         var val: Int16
         
         switch self {
-        case let b where b >= 0:
+        case let err where err < 0:
+            return ""
+        case let b where b < 1000:
             unit = "B"
             val = Int16(self)
-        case let kb where kb >= 1000:
+        case let kb where kb < 1000000:
             unit = "KB"
             val = Int16(kb / 1000)
-        case let MB where MB >= 1000000:
+        case let mb where mb < 1000000000:
             unit = "MB"
-            val = Int16(MB / 1000000)
-        case let GB where GB >= 1000000000:
-            unit = "GB"
-            val = Int16(GB / 1000000000)
+            val = Int16(mb / 1000000)
         default:
             return ""
         }
@@ -110,13 +109,15 @@ extension Int64 {
     
     var timeDec: String {
         switch self {
-        case let s where s > 0:
+        case let err where err < 0:
+            return ""
+        case let s where s < 60:
             return "\(s) 秒"
-        case let m where m >= 60:
+        case let m where m < 3600:
             return "\(Int16(m / 60)) 分"
-        case let h where h >= 3600:
+        case let h where h < 86400:
             return "\(Int16(h / 3600)) 小时"
-        case let d where d >= 86400:
+        case let d where d < 2592000:
             return "\(Int16(d / 86400)) 天"
         default:
             return ""
