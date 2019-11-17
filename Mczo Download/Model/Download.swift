@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import Combine
 
 enum DownloadError: Error {
     case notNetwork
@@ -20,56 +21,73 @@ protocol DownloadProtocol {
 }
 
 struct File: FileProtocol {
-    let url: URL
-    let name: String
-    let mime: String
-    let size: Int64
-    var threads: [[Int64]]
-    let save: URL
-//    let ext: String
-    var full: URL {
-        return save.appendingPathComponent(name)
-    }
+    var url: URL
+    var name: String
+    var mime: String?
+    var size: Int64?
+    var threads: [[Int64]]?
+    var createdAt: Date
 }
 
 protocol FileProtocol {
-    var url: URL { get }
-    var name: String { get }
-    var mime: String { get }
-    var size: Int64 { get }
-    var threads: [[Int64]] { get set }
-    var save: URL { get }
+    var url: URL { get set }
+    var name: String { get set }
+    var mime: String? { get set }
+    var size: Int64? { get set }
+    var threads: [[Int64]]? { get set }
+    var createdAt: Date { get set }
 }
 
-class DownloadTask {
-    fileprivate lazy var saveDir: URL = try! FileManager.default.url(for: .downloadsDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+class DownloadTask: ObservableObject {
     fileprivate lazy var session: URLSession = URLSession.shared
     
-    var file: File?
+    var file: File!
     
     var threads: [DownloadThread] = Array()
     private var downloadFileManage: DownloadFileManage?
     
-    var status: DLStatus?
+    let complete = PassthroughSubject<Void, Never>()
+    var status: DLStatus? {
+        didSet {
+            complete.send()
+            switch status {
+            case .complete:
+                print("comp")
+                complete.send()
+            default:
+                break
+            }
+        }
+    }
     
     var shard: Int8!
     var title: String!
-    var url: String!
+    var url: URL!
     init(url urlString: String, title: String, shard: Int8) {
         self.shard = shard
         self.title = title
-        self.url = urlString
+        self.url = URL(string: urlString)
+        self.file = File(
+            url: self.url,
+            name: self.url.lastPathComponent,
+            createdAt: Date())
+        
+        do {
+            try header()
+            start()
+        } catch {
+            self.status = .failure
+        }
     }
     
     init(file: File) {
         
     }
     
-    private func getHeader(urlString: String) {
+    private func getHeader() {
         let sema = DispatchSemaphore(value: 0)
-        
         let request: URLRequest = {
-            var config = URLRequest(url: URL(string: urlString)!)
+            var config = URLRequest(url: self.url)
             config.httpMethod = "HEAD"
             
             return config
@@ -87,6 +105,8 @@ class DownloadTask {
                 
                 guard case let res as HTTPURLResponse = response,
                     200..<300 ~= res.statusCode else {
+                        print("error code")
+                        sema.signal()
                         return
                     }
                 
@@ -101,40 +121,38 @@ class DownloadTask {
                     }
                     threads.append([startSeed, endSeed])
                 }
-                
-                
+
                 if self.title.isEmpty {
                     self.title = response?.suggestedFilename
                 }
-                    
+
                 self.file = File(
                         url: res.url!,
                         name: self.title,
                         mime: res.value(forHTTPHeaderField: "Content-Type")!,
                         size: size,
                         threads: threads,
-                        save: self.saveDir
+                        createdAt: self.file.createdAt
                 )
                 
                 sema.signal()
-            }
-            .resume()
+            }.resume()
         
         sema.wait()
     }
     
     func header() throws {
-        getHeader(urlString: url)
-        guard let exFile = file else { throw DownloadError.notNetwork }
-        
         status = .wait
-        downloadFileManage = DownloadFileManage(file: exFile)
         
-        for index in 0..<exFile.threads.count {
-            threads.append(
-                DownloadThread(downloadFileManage: downloadFileManage!,
-                file: exFile,
-                index: index) )
+        getHeader()
+        if self.file.size == nil { throw DownloadError.notNetwork }
+
+        downloadFileManage = DownloadFileManage(file: self.file)
+
+        for index in 0..<self.file.threads!.count {
+            threads.append(DownloadThread(downloadFileManage: downloadFileManage!,
+                                          file: self.file,
+                                          index: index))
         }
     }
     
@@ -177,7 +195,7 @@ class DownloadThread: NSObject, DownloadProtocol {
         self.file = file
         self.downloadFileManage = downloadFileManage
         
-        seeks = file.threads[index]
+        seeks = file.threads![index]
         self.request = URLRequest(url: file.url)
         request.httpMethod = "GET"
         request.addValue("bytes=\(seeks.first!)-\(seeks.last!)", forHTTPHeaderField: "Range")
@@ -199,7 +217,7 @@ extension DownloadThread: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         let fileData = fileManager.contents(atPath: location.path)
         downloadFileManage.write(seek: seeks.first!, data: fileData!)
-        print(location.path, file.size)
+        print(location.path, file.size!)
         
         do {
             try fileManager.removeItem(at: location)
@@ -220,23 +238,26 @@ extension DownloadThread: URLSessionDownloadDelegate {
 
 
 class DownloadFileManage {
-    private lazy var fileManager: FileManager = FileManager.default
+    private var fileManager: FileManager = FileManager.default
     private var writingFile: FileHandle?
     var file: File
+    let full: URL
     
     init(file: File) {
         self.file = file
+        self.full = try! fileManager.url(for: .downloadsDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(file.name)
+        
         create()
         
-        try! writingFile = FileHandle(forWritingTo: file.full)
+        try! writingFile = FileHandle(forWritingTo: full)
     }
     
     func create() {
-        if fileManager.fileExists(atPath: file.full.path) {
+        if fileManager.fileExists(atPath: full.path) {
             return
         }
         
-        let _: Bool = fileManager.createFile(atPath: file.full.path, contents: Data(count: Int(file.size)), attributes: nil)
+        let _: Bool = fileManager.createFile(atPath: full.path, contents: Data(count: Int(file.size!)), attributes: nil)
     }
     
     func write(seek: Int64, data: Data) {

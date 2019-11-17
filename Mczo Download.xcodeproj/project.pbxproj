@@ -14,6 +14,7 @@
 		A2179B41234E333C00C78E34 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2179B40234E333C00C78E34 /* Preview Assets.xcassets */; };
 		A26A538C235DF2B100E92A96 /* SettingMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26A538B235DF2B100E92A96 /* SettingMain.swift */; };
 		A27DB1BE237ADE2E0076CDF9 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27DB1BD237ADE2E0076CDF9 /* Config.swift */; };
+		A28F4531238027EF0082AEB4 /* ModelDownloading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A28F4530238027EF0082AEB4 /* ModelDownloading.swift */; };
 		A29835A9235F68EF006F2075 /* GlobalSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29835A8235F68EF006F2075 /* GlobalSetting.swift */; };
 		A2B9767123743C8F0085705A /* DLListDownloading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B9767023743C8F0085705A /* DLListDownloading.swift */; };
 		A2DEFFCE234E3AD400792564 /* DLList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DEFFCD234E3AD400792564 /* DLList.swift */; };
@@ -32,6 +33,7 @@
 		A2179B45234E333C00C78E34 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A26A538B235DF2B100E92A96 /* SettingMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingMain.swift; sourceTree = "<group>"; };
 		A27DB1BD237ADE2E0076CDF9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
+		A28F4530238027EF0082AEB4 /* ModelDownloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloading.swift; sourceTree = "<group>"; };
 		A29835A8235F68EF006F2075 /* GlobalSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSetting.swift; sourceTree = "<group>"; };
 		A2B9767023743C8F0085705A /* DLListDownloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListDownloading.swift; sourceTree = "<group>"; };
 		A2DEFFCD234E3AD400792564 /* DLList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLList.swift; sourceTree = "<group>"; };
@@ -118,6 +120,15 @@
 			path = Setting;
 			sourceTree = "<group>";
 		};
+		A28F452F238027C60082AEB4 /* Model */ = {
+			isa = PBXGroup;
+			children = (
+				A27DB1BD237ADE2E0076CDF9 /* Config.swift */,
+				A28F4530238027EF0082AEB4 /* ModelDownloading.swift */,
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
 		A2DEFFD42350C2C100792564 /* Model */ = {
 			isa = PBXGroup;
 			children = (
@@ -130,8 +141,8 @@
 		A2E3BBE7237AEBF100D88DC0 /* CoreData */ = {
 			isa = PBXGroup;
 			children = (
+				A28F452F238027C60082AEB4 /* Model */,
 				A2E3BBE8237AEBFE00D88DC0 /* Schema */,
-				A27DB1BD237ADE2E0076CDF9 /* Config.swift */,
 			);
 			path = CoreData;
 			sourceTree = "<group>";
@@ -214,6 +225,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A28F4531238027EF0082AEB4 /* ModelDownloading.swift in Sources */,
 				A2E3BBEB237AEC3500D88DC0 /* Download.xcdatamodeld in Sources */,
 				A2B9767123743C8F0085705A /* DLListDownloading.swift in Sources */,
 				A2DEFFCE234E3AD400792564 /* DLList.swift in Sources */,

@@ -37,16 +37,7 @@ struct DLAdd: View {
                                                                title: self.formTitle,
                                                                shard: Int8(self.globalSetting.download.shard))
                     
-                    do {
-                        try downloading.header()
-                        self.downloadingManage.list.append(downloading)
-                        downloading.start()
-                        
-                        self.formTitle = String()
-                    } catch {
-                        
-                    }
-                                        
+                    self.downloadingManage.list.append(downloading)
                 }) {
                     Text("完成")
                 }

@@ -14,59 +14,69 @@ struct DLListDownloading: View {
     
     @ObservedObject var downloadingManage: DownloadingManage
     
+    private func listItem(item: DLTaskGenre) -> some View {
+        HStack {
+            Group {
+                if item.status == DLStatus.wait {
+                    Circle()
+                        .fill(Color.gray)
+                        .rotationEffect(.degrees(self.spin ? 360: 0))
+                        .animation(Animation.linear(duration: 1.1).repeatForever(autoreverses: false))
+                        .onAppear() {
+                            self.spin.toggle()
+                        }
+                } else {
+                    ZStack {
+                        ProgressButtonCircle(endAngleRadians: item.process)
+                            .fill(Color.blue)
+
+                        Group {
+                            if item.status == DLStatus.downloading {
+                                Image(systemName: "stop.fill")
+                            } else if item.status == DLStatus.pause {
+                                Image(systemName: "play.fill")
+                            }
+                        }
+                        .foregroundColor(.blue)
+                    }
+                }
+            }
+            .frame(width: 45, height: 45)
+            .onTapGesture {
+                print("aa")
+            }
+            
+            NavigationLink(destination: Text("a")) {
+                VStack {
+                    HStack {
+                        Text(item.file.name)
+                            .modifier(DLCompositionTitle())
+
+                        Spacer()
+                    }
+
+                    HStack {
+                        Text(item.speed.btySize)
+
+                        Spacer()
+
+                        Text(item.time.timeDec)
+                    }
+                    .modifier(DLCompositionDescription())
+                }
+            }
+            .onReceive(item.complete) {
+                _ in
+                print("aa")
+            }
+        }
+    }
+    
     var body: some View {
         ForEach(downloadingManage.list) {
             item in
         
-            NavigationLink(destination: Text("a")) {
-                HStack {
-                    VStack {
-                        if item.status == DLStatus.wait {
-                            Circle()
-                                .fill(Color.gray)
-                                .rotationEffect(.degrees(self.spin ? 360: 0))
-                                .animation(Animation.linear(duration: 1.1).repeatForever(autoreverses: false))
-                                .onAppear() {
-                                    self.spin.toggle()
-                                }
-                        } else {
-                            ZStack {
-                                ProgressButtonCircle(endAngleRadians: item.process)
-                                    .fill(Color.blue)
-
-                                Group {
-                                    if item.status == DLStatus.downloading {
-                                        Image(systemName: "stop.fill")
-                                    } else if item.status == DLStatus.pause {
-                                        Image(systemName: "play.fill")
-                                    }
-                                }
-                                .foregroundColor(.blue)
-                            }
-                        }
-                    }
-                    .frame(width: 45, height: 45)
-
-
-                    VStack {
-                        HStack {
-                            Text(item.file!.name)
-                                .modifier(DLCompositionTitle())
-
-                            Spacer()
-                        }
-
-                        HStack {
-                            Text(item.speed.btySize)
-
-                            Spacer()
-
-                            Text(item.time.timeDec)
-                        }
-                        .modifier(DLCompositionDescription())
-                    }
-                }
-            }
+            self.listItem(item: item)
         }
     }
 }
