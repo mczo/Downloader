@@ -14,13 +14,19 @@
 		A2179B41234E333C00C78E34 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2179B40234E333C00C78E34 /* Preview Assets.xcassets */; };
 		A26A538C235DF2B100E92A96 /* SettingMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26A538B235DF2B100E92A96 /* SettingMain.swift */; };
 		A27DB1BE237ADE2E0076CDF9 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27DB1BD237ADE2E0076CDF9 /* Config.swift */; };
-		A28F4531238027EF0082AEB4 /* ModelDownloading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A28F4530238027EF0082AEB4 /* ModelDownloading.swift */; };
+		A28F4531238027EF0082AEB4 /* Downloading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A28F4530238027EF0082AEB4 /* Downloading.swift */; };
 		A29835A9235F68EF006F2075 /* GlobalSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29835A8235F68EF006F2075 /* GlobalSetting.swift */; };
 		A2B9767123743C8F0085705A /* DLListDownloading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B9767023743C8F0085705A /* DLListDownloading.swift */; };
 		A2DEFFCE234E3AD400792564 /* DLList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DEFFCD234E3AD400792564 /* DLList.swift */; };
 		A2DEFFD3234F5F6900792564 /* DLAdd.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DEFFD2234F5F6900792564 /* DLAdd.swift */; };
 		A2DEFFD82350C8B200792564 /* Download.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DEFFD72350C8B200792564 /* Download.swift */; };
 		A2E3BBEB237AEC3500D88DC0 /* Download.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A2E3BBE9237AEC3500D88DC0 /* Download.xcdatamodeld */; };
+		A2E465EE2386C1EF001687C6 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E465ED2386C1EF001687C6 /* Task.swift */; };
+		A2E465F02386C210001687C6 /* Thread.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E465EF2386C210001687C6 /* Thread.swift */; };
+		A2E465F22386C21B001687C6 /* FileManage.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E465F12386C21B001687C6 /* FileManage.swift */; };
+		A2E465F4238835A8001687C6 /* Complete.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E465F3238835A8001687C6 /* Complete.swift */; };
+		A2E465F623894FCD001687C6 /* DLListComplete.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E465F523894FCD001687C6 /* DLListComplete.swift */; };
+		A2E465F8238953A7001687C6 /* DLListFailure.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E465F7238953A7001687C6 /* DLListFailure.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,13 +39,19 @@
 		A2179B45234E333C00C78E34 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		A26A538B235DF2B100E92A96 /* SettingMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingMain.swift; sourceTree = "<group>"; };
 		A27DB1BD237ADE2E0076CDF9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
-		A28F4530238027EF0082AEB4 /* ModelDownloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelDownloading.swift; sourceTree = "<group>"; };
+		A28F4530238027EF0082AEB4 /* Downloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloading.swift; sourceTree = "<group>"; };
 		A29835A8235F68EF006F2075 /* GlobalSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSetting.swift; sourceTree = "<group>"; };
 		A2B9767023743C8F0085705A /* DLListDownloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListDownloading.swift; sourceTree = "<group>"; };
 		A2DEFFCD234E3AD400792564 /* DLList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLList.swift; sourceTree = "<group>"; };
 		A2DEFFD2234F5F6900792564 /* DLAdd.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLAdd.swift; sourceTree = "<group>"; };
 		A2DEFFD72350C8B200792564 /* Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Download.swift; sourceTree = "<group>"; };
 		A2E3BBEA237AEC3500D88DC0 /* Download.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = Download.xcdatamodel; sourceTree = "<group>"; };
+		A2E465ED2386C1EF001687C6 /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
+		A2E465EF2386C210001687C6 /* Thread.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Thread.swift; sourceTree = "<group>"; };
+		A2E465F12386C21B001687C6 /* FileManage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileManage.swift; sourceTree = "<group>"; };
+		A2E465F3238835A8001687C6 /* Complete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Complete.swift; sourceTree = "<group>"; };
+		A2E465F523894FCD001687C6 /* DLListComplete.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListComplete.swift; sourceTree = "<group>"; };
+		A2E465F7238953A7001687C6 /* DLListFailure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListFailure.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,20 +108,22 @@
 		A2179B4B234E340500C78E34 /* View */ = {
 			isa = PBXGroup;
 			children = (
-				A2179B4C234E341200C78E34 /* Process */,
+				A2179B4C234E341200C78E34 /* List */,
 				A2179B4F234E35B900C78E34 /* Setting */,
 			);
 			path = View;
 			sourceTree = "<group>";
 		};
-		A2179B4C234E341200C78E34 /* Process */ = {
+		A2179B4C234E341200C78E34 /* List */ = {
 			isa = PBXGroup;
 			children = (
 				A2DEFFD2234F5F6900792564 /* DLAdd.swift */,
 				A2DEFFCD234E3AD400792564 /* DLList.swift */,
 				A2B9767023743C8F0085705A /* DLListDownloading.swift */,
+				A2E465F523894FCD001687C6 /* DLListComplete.swift */,
+				A2E465F7238953A7001687C6 /* DLListFailure.swift */,
 			);
-			path = Process;
+			path = List;
 			sourceTree = "<group>";
 		};
 		A2179B4F234E35B900C78E34 /* Setting */ = {
@@ -124,7 +138,8 @@
 			isa = PBXGroup;
 			children = (
 				A27DB1BD237ADE2E0076CDF9 /* Config.swift */,
-				A28F4530238027EF0082AEB4 /* ModelDownloading.swift */,
+				A28F4530238027EF0082AEB4 /* Downloading.swift */,
+				A2E465F3238835A8001687C6 /* Complete.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -132,7 +147,7 @@
 		A2DEFFD42350C2C100792564 /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				A2DEFFD72350C8B200792564 /* Download.swift */,
+				A2E465EC2386C1BE001687C6 /* Download */,
 				A29835A8235F68EF006F2075 /* GlobalSetting.swift */,
 			);
 			path = Model;
@@ -153,6 +168,17 @@
 				A2E3BBE9237AEC3500D88DC0 /* Download.xcdatamodeld */,
 			);
 			path = Schema;
+			sourceTree = "<group>";
+		};
+		A2E465EC2386C1BE001687C6 /* Download */ = {
+			isa = PBXGroup;
+			children = (
+				A2DEFFD72350C8B200792564 /* Download.swift */,
+				A2E465ED2386C1EF001687C6 /* Task.swift */,
+				A2E465EF2386C210001687C6 /* Thread.swift */,
+				A2E465F12386C21B001687C6 /* FileManage.swift */,
+			);
+			path = Download;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -225,15 +251,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A28F4531238027EF0082AEB4 /* ModelDownloading.swift in Sources */,
+				A2E465F22386C21B001687C6 /* FileManage.swift in Sources */,
+				A28F4531238027EF0082AEB4 /* Downloading.swift in Sources */,
+				A2E465F4238835A8001687C6 /* Complete.swift in Sources */,
 				A2E3BBEB237AEC3500D88DC0 /* Download.xcdatamodeld in Sources */,
 				A2B9767123743C8F0085705A /* DLListDownloading.swift in Sources */,
+				A2E465F623894FCD001687C6 /* DLListComplete.swift in Sources */,
 				A2DEFFCE234E3AD400792564 /* DLList.swift in Sources */,
 				A26A538C235DF2B100E92A96 /* SettingMain.swift in Sources */,
+				A2E465F02386C210001687C6 /* Thread.swift in Sources */,
 				A27DB1BE237ADE2E0076CDF9 /* Config.swift in Sources */,
 				A2DEFFD3234F5F6900792564 /* DLAdd.swift in Sources */,
 				A2179B35234E333B00C78E34 /* AppDelegate.swift in Sources */,
+				A2E465EE2386C1EF001687C6 /* Task.swift in Sources */,
 				A2179B37234E333B00C78E34 /* SceneDelegate.swift in Sources */,
+				A2E465F8238953A7001687C6 /* DLListFailure.swift in Sources */,
 				A29835A9235F68EF006F2075 /* GlobalSetting.swift in Sources */,
 				A2179B3C234E333B00C78E34 /* ContentView.swift in Sources */,
 				A2DEFFD82350C8B200792564 /* Download.swift in Sources */,

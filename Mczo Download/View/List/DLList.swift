@@ -31,8 +31,19 @@ struct DLList: View {
             List {
                 selectionView
                 
-                if selection == DLStatus.downloading {
-                    DLListDownloading(downloadingManage: downloadingManage)
+                Section {
+                    if selection == DLStatus.downloading {
+                        DLListDownloading(downloadingManage: downloadingManage)
+                    }
+                    
+                    if selection == DLStatus.complete {
+                        DLListComplete(downloadingManage: downloadingManage)
+                    }
+                    
+    //                if selection == DLStatus.failure {
+    //                    DLListFailure(downloadingManage: downloadingManage)
+    //                }
+
                 }
             }
             .navigationBarTitle("下载", displayMode: .automatic)

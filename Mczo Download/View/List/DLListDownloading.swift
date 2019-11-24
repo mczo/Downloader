@@ -10,9 +10,8 @@ import SwiftUI
 import Combine
 
 struct DLListDownloading: View {
-    @State private var spin: Bool = false
-    
     @ObservedObject var downloadingManage: DownloadingManage
+    @State private var spin: Bool = false
     
     private func listItem(item: DLTaskGenre) -> some View {
         HStack {
@@ -25,7 +24,8 @@ struct DLListDownloading: View {
                         .onAppear() {
                             self.spin.toggle()
                         }
-                } else {
+                }
+                else {
                     ZStack {
                         ProgressButtonCircle(endAngleRadians: item.process)
                             .fill(Color.blue)
@@ -35,6 +35,8 @@ struct DLListDownloading: View {
                                 Image(systemName: "stop.fill")
                             } else if item.status == DLStatus.pause {
                                 Image(systemName: "play.fill")
+                            } else if item.status == DLStatus.complete {
+                                Image(systemName: "checkmark.square.fill")
                             }
                         }
                         .foregroundColor(.blue)
@@ -43,17 +45,21 @@ struct DLListDownloading: View {
             }
             .frame(width: 45, height: 45)
             .onTapGesture {
-                print("aa")
+                if item.status == DLStatus.downloading {
+                    item.pause()
+                } else if item.status == DLStatus.pause {
+                    item.downloading()
+                }
             }
             
             NavigationLink(destination: Text("a")) {
                 VStack {
                     HStack {
-                        Text(item.file.name)
-                            .modifier(DLCompositionTitle())
+                        Text("\(item.file.name)")
 
                         Spacer()
                     }
+                    .modifier(DLCompositionTitle())
 
                     HStack {
                         Text(item.speed.btySize)
@@ -64,10 +70,6 @@ struct DLListDownloading: View {
                     }
                     .modifier(DLCompositionDescription())
                 }
-            }
-            .onReceive(item.complete) {
-                _ in
-                print("aa")
             }
         }
     }
@@ -82,11 +84,30 @@ struct DLListDownloading: View {
 }
 
 
+class DLCallBack: DLCallBackProtocol, DLStatusProtocol {
+    var status: DLStatus = .wait
+    
+    let modelOperat: ModelOperat = ModelOperat<ModelComplete>()
+    
+    func downloading() -> Void {
+        self.status = .downloading
+    }
+    
+    func pause() -> Void {
+        self.status = .pause
+    }
+    
+    func complete(objects: [String: Any]) -> Void {
+        self.status = .complete
+        
+        modelOperat.insert(objects: objects)
+    }
+}
 
 class DownloadingManage: ObservableObject {
-    private var cancellable: AnyCancellable?
-    
     @Published var list: [DLTaskGenre] = []
+    
+    private var cancellable: AnyCancellable?
     
     init() {
         cancellable = Timer.publish(every: 1, on: .main, in: .common)
@@ -101,7 +122,31 @@ class DownloadingManage: ObservableObject {
 
 class DLTaskGenre: DownloadTask, Identifiable {
     var id: UUID = UUID()
+    
     private var prevTotalBytesWritten: Int64 = 0
+    
+    var status: DLStatus {
+        get {
+            self.callback!.status
+        }
+    }
+    
+    override init(url: String, title: String, shard: Int8) {
+        super.init(url: url, title: title, shard: shard)
+        self.callback = DLCallBack()
+        
+        do {
+            try header()
+            downloading()
+        } catch {
+            self.callback?.failure?()
+        }
+
+    }
+    
+//    convenience init(file: File) {
+//        self.init()
+//    }
 }
 
 extension DLTaskGenre {
@@ -109,7 +154,7 @@ extension DLTaskGenre {
         get {
             let total: Float = threads.reduce(0) { $0 + $1.process }
             let proportion: Float = total / Float(threads.count)
-    
+
             return CGFloat(proportion * 3.6 - 90)
         }
     }
@@ -119,9 +164,10 @@ extension DLTaskGenre {
             let currentTotalBytesWritten: Int64 = threads.reduce(0) {
                 all, current in
 
-                guard let totalBytesWritten = current.totalBytesWritten else { return -1 }
+                guard let totalBytesWritten = current.totalBytesWritten else { return 0 }
                 return all + totalBytesWritten
             }
+            
             let currentSpeed: Int64 = currentTotalBytesWritten - prevTotalBytesWritten
             prevTotalBytesWritten = currentTotalBytesWritten
             return currentSpeed
@@ -179,5 +225,3 @@ fileprivate struct ProgressButtonCircle: Shape {
         return p.strokedPath(style)
     }
 }
-
-

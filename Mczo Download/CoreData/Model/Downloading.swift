@@ -1,5 +1,5 @@
 //
-//  ModelDownloading.swift
+//  Downloading.swift
 //  Mczo Download
 //
 //  Created by Wirspe on 2019/11/16.
@@ -12,5 +12,8 @@ import CoreData
 public class ModelDownloading: CoreDataDownload, Managed {
     @NSManaged public var mime: String
     @NSManaged public var size: Int64
-    //    @NSManaged fileprivate(set) var threads: [[Int]]
+}
+
+extension ModelDownloading {
+    
 }
