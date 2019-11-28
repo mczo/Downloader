@@ -35,8 +35,6 @@ struct DLListDownloading: View {
                                 Image(systemName: "stop.fill")
                             } else if item.status == DLStatus.pause {
                                 Image(systemName: "play.fill")
-                            } else if item.status == DLStatus.complete {
-                                Image(systemName: "checkmark.square.fill")
                             }
                         }
                         .foregroundColor(.blue)
@@ -114,7 +112,7 @@ class DownloadingManage: ObservableObject {
         .autoconnect()
         .sink() {
             _ in
-            
+                        
             self.list = self.list
         }
     }
@@ -143,10 +141,6 @@ class DLTaskGenre: DownloadTask, Identifiable {
         }
 
     }
-    
-//    convenience init(file: File) {
-//        self.init()
-//    }
 }
 
 extension DLTaskGenre {

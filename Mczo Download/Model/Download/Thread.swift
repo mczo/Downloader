@@ -9,7 +9,6 @@
 import Foundation
 
 class DownloadThread: NSObject {
-    private let fileManager = FileManager.default
     private let downloadFileManage: DownloadFileManage
     lazy var session: URLSession = {
         URLSession(configuration: .default, delegate: self, delegateQueue: nil)
@@ -30,7 +29,8 @@ class DownloadThread: NSObject {
         }
     }
     
-    var callback: (() -> Void)!
+    var completeCallback: (() -> Void)!
+    var pauseCallback: ((_ index: Int, _ breakpoint: Int64) -> Void)!
     
     init(downloadFileManage: DownloadFileManage, file: File, index: Int) {
         self.file = file
@@ -46,31 +46,37 @@ class DownloadThread: NSObject {
     }
         
     func downloading(callback: @escaping () -> Void) {
-        self.callback = callback
-        
-        
+        self.completeCallback = callback
+        print("bytes=\(self.file.threads![index].first!)-\(self.file.threads![index].last!)")
         
         self.task?.resume()
     }
     
-    func pause() {
-        self.task?.cancel()
+    let REGetTmp: NSRegularExpression = try! NSRegularExpression(pattern: "CFNetworkDownload_[^.]+.tmp", options: .caseInsensitive)
+    func pause(callback: @escaping (_ index: Int, _ breakpoint: Int64) -> Void) {
+        self.pauseCallback = callback
+        
+        self.task?.cancel() {
+            resumeDataOrNil in
+            
+            guard let resumeData = resumeDataOrNil else { return }
+            let unprocess: String = String(decoding: resumeData, as: UTF8.self)
+            
+            guard let matchs = self.REGetTmp.firstMatch(in: unprocess, options: .reportProgress, range: NSRange(location: 0, length: unprocess.count)) else { return }
+            let tmpFileName: String = (unprocess as NSString).substring(with: matchs.range)
+            
+            let fileSize: Int64 = self.downloadFileManage.write(seek: self.file.threads![self.index].first!, unUrl: tmpFileName)
+
+            self.pauseCallback(self.index, self.file.threads![self.index].first! + fileSize)
+        }
     }
 }
 
 extension DownloadThread: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        let fileData = fileManager.contents(atPath: location.path)
-        downloadFileManage.write(seek: self.file.threads![index].first!, data: fileData!)
-        print(location.path, fileData!.count)
-        
-        self.callback()
-        
-        do {
-            try fileManager.removeItem(at: location)
-        } catch {
-            print("文件删除失败")
-        }
+        _ = self.downloadFileManage.write(seek: self.file.threads![self.index].first!, unUrl: location)
+        print(self.index, "complete")
+        self.completeCallback()
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {
@@ -79,12 +85,5 @@ extension DownloadThread: URLSessionDownloadDelegate {
             self.totalBytesWritten = totalBytesWritten
             self.totalBytesExpectedToWrite = totalBytesExpectedToWrite
         }
-    }
-    
-    func urlSession(_ session: URLSession, task: URLSessionTask, didCompleteWithError error: Error?) {
-        if error == nil { return }
-        
-//        self.file.threads![index].first += task.countOfBytesReceived
-        print(task.countOfBytesReceived)
     }
 }

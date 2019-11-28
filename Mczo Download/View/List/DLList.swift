@@ -11,6 +11,7 @@ import SwiftUI
 struct DLList: View {
     @State private var selection: DLStatus = .downloading
     @State private var DLAddPresented: Bool = false
+    @State private var isEdit: Bool = false
     
     @ObservedObject var downloadingManage: DownloadingManage = DownloadingManage()
     
@@ -34,24 +35,20 @@ struct DLList: View {
                 Section {
                     if selection == DLStatus.downloading {
                         DLListDownloading(downloadingManage: downloadingManage)
-                    }
-                    
-                    if selection == DLStatus.complete {
+                    } else if selection == DLStatus.complete {
                         DLListComplete(downloadingManage: downloadingManage)
+                    } else if selection == DLStatus.failure {
+                        DLListFailure(downloadingManage: downloadingManage)
                     }
-                    
-    //                if selection == DLStatus.failure {
-    //                    DLListFailure(downloadingManage: downloadingManage)
-    //                }
 
                 }
             }
             .navigationBarTitle("下载", displayMode: .automatic)
             .navigationBarItems(
                 leading: Button(action: {
-                    
+                    self.isEdit.toggle()
                 }) {
-                    Text("编辑")
+                    Text(self.isEdit ? "完成" : "选择")
                 },
                 trailing: Button(action: {
                     self.DLAddPresented.toggle()

@@ -72,4 +72,14 @@ struct ModelOperat<Model> where Model: NSManagedObject {
             print("error")
         }
     }
+    
+    func delete(item: NSManagedObject) {
+        self.context.delete(item)
+        
+        do {
+            try self.context.save()
+        } catch {
+            print("error")
+        }
+    }
 }

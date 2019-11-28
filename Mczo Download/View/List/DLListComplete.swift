@@ -12,6 +12,8 @@ struct DLListComplete: View {
     @ObservedObject var downloadingManage: DownloadingManage
     @FetchRequest(fetchRequest: ModelComplete.sortedFetchRequest) var completeList: FetchedResults<ModelComplete>
     
+    let modelOperat: ModelOperat = ModelOperat<ModelComplete>()
+    
     private var dateFormatter: DateFormatter {
         get {
             let dateFormatter = DateFormatter()
@@ -42,11 +44,30 @@ struct DLListComplete: View {
                 }
                 .modifier(DLCompositionDescription())
             }
+            .contextMenu {
+                Group {
+                    Button(action: {
+                        print("a")
+                    }) {
+                        Text("暂停")
+                        Image(systemName: "stop")
+                    }
+                    
+                    Button(action: {
+                        print("a")
+                    }) {
+                        Text("继续")
+                        Image(systemName: "play")
+                    }
+                }
+            }
         }
         .onDelete {
-            index in
-            
-            print(index)
+            indexSet in
+
+            guard let index = indexSet.first else { return }
+            self.modelOperat.delete(item: self.completeList[index])
         }
+
     }
 }

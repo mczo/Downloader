@@ -24,7 +24,7 @@ class DownloadTask {
     
     var file: File!
     
-    var threads: [DownloadThread] = Array()
+    var threads: [DownloadThread]!
     private var downloadFileManage: DownloadFileManage?
     
     var callback: (DLCallBackProtocol & DLStatusProtocol)?
@@ -41,6 +41,10 @@ class DownloadTask {
             url: self.url,
             name: self.url.lastPathComponent,
             createdAt: Date())
+    }
+    
+    deinit {
+        self.downloadFileManage?.close()
     }
     
     private func getHeader() {
@@ -106,19 +110,13 @@ class DownloadTask {
         if self.file.size == nil { throw DownloadError.notNetwork }
 
         downloadFileManage = DownloadFileManage(file: self.file)
-
-        for index in 0..<self.file.threads!.count {
-            threads.append(DownloadThread(downloadFileManage: downloadFileManage!,
-                                          file: self.file,
-                                          index: index))
-        }
     }
     
-    private var completeTotal: Int8 = 0
     func downloading() {
-        let completeCallback: (() -> Void) = {
-            self.completeTotal += 1
-            if self.completeTotal == self.shard {
+        var count: Int8 = 0
+        let completeCallback: () -> Void = {
+            count += 1
+            if count == self.shard {
                 self.callback?.complete?(objects: [
                     "name": self.file.name,
                     "createdAt": self.file.createdAt,
@@ -129,18 +127,40 @@ class DownloadTask {
             }
         }
         
-        for thread in threads {
-            thread.downloading(callback: completeCallback)
+        guard let threadSeeds = self.file.threads else { return }
+        self.threads = Array()
+        for index in 0..<threadSeeds.count {
+            if threadSeeds[index].first == threadSeeds[index].last {
+                print("same")
+            }
+            
+            let downloadThread = DownloadThread(
+                downloadFileManage: downloadFileManage!,
+                file: self.file,
+                index: index)
+            
+            threads.append(downloadThread)
+            downloadThread.downloading(callback: completeCallback)
         }
         
         self.callback?.downloading?()
     }
     
     func pause() {
-        for thread in threads {
-            thread.pause()
+        var count: Int8 = 0
+        let pauseCallback: (_ index: Int, _ breakpoint: Int64) -> Void = {
+            index, breakpoint in
+            
+            self.file!.threads?[index][0] = breakpoint
+            
+            count += 1
+            if count == self.shard {
+                self.callback?.pause?()
+            }
         }
         
-        self.callback?.pause?()
+        for thread in threads {
+            thread.pause(callback: pauseCallback)
+        }
     }
 }
