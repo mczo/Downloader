@@ -14,8 +14,15 @@
         <attribute name="size" optional="YES" attributeType="Integer 64" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="url" optional="YES" attributeType="String"/>
     </entity>
+    <entity name="Failure" representedClassName=".ModelFailure" syncable="YES">
+        <attribute name="createdAt" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="info" optional="YES" attributeType="String"/>
+        <attribute name="name" optional="YES" attributeType="String"/>
+        <attribute name="url" optional="YES" attributeType="String"/>
+    </entity>
     <elements>
-        <element name="Downloading" positionX="-179.953125" positionY="-18" width="244.953125" height="118"/>
         <element name="Complete" positionX="76.26953125" positionY="-16.93359375" width="262.23046875" height="118"/>
+        <element name="Downloading" positionX="-179.953125" positionY="-18" width="244.953125" height="118"/>
+        <element name="Failure" positionX="18" positionY="18" width="128" height="103"/>
     </elements>
 </model>

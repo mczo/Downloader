@@ -66,7 +66,15 @@ struct DLListComplete: View {
             indexSet in
 
             guard let index = indexSet.first else { return }
-            self.modelOperat.delete(item: self.completeList[index])
+            
+            let item = self.completeList[index]
+
+            let file: File = File(url: URL(string: item.url)!,
+                                  name: item.name,
+                                  createdAt: item.createdAt)
+            DownloadFileManage(file: file).delete()
+            
+            self.modelOperat.delete(item: item)
         }
 
     }

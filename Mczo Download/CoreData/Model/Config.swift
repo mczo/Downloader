@@ -24,7 +24,7 @@ protocol Managed: class, NSFetchRequestResult {
 extension Managed {
     static var defaultSortDescriptors: [NSSortDescriptor] {
         get {
-            let sortDescriptors: NSSortDescriptor = NSSortDescriptor(key: "createdAt", ascending: true)
+            let sortDescriptors: NSSortDescriptor = NSSortDescriptor(key: "createdAt", ascending: false)
             return [sortDescriptors]
         }
     }

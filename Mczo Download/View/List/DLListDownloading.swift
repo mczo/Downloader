@@ -46,7 +46,7 @@ struct DLListDownloading: View {
                 if item.status == DLStatus.downloading {
                     item.pause()
                 } else if item.status == DLStatus.pause {
-                    item.downloading()
+                    item.continuance()
                 }
             }
             
@@ -85,20 +85,27 @@ struct DLListDownloading: View {
 class DLCallBack: DLCallBackProtocol, DLStatusProtocol {
     var status: DLStatus = .wait
     
-    let modelOperat: ModelOperat = ModelOperat<ModelComplete>()
+    let CompleteModelOperat: ModelOperat = ModelOperat<ModelComplete>()
+    let failureModelOperat: ModelOperat = ModelOperat<ModelFailure>()
     
-    func downloading() -> Void {
+    func downloading() {
         self.status = .downloading
     }
     
-    func pause() -> Void {
+    func pause() {
         self.status = .pause
     }
     
-    func complete(objects: [String: Any]) -> Void {
+    func complete(objects: [String: Any]) {
         self.status = .complete
         
-        modelOperat.insert(objects: objects)
+        self.CompleteModelOperat.insert(objects: objects)
+    }
+    
+    func failure(objects: [String: Any]) {
+        self.status = .failure
+        
+        self.failureModelOperat.insert(objects: objects)
     }
 }
 
@@ -112,8 +119,14 @@ class DownloadingManage: ObservableObject {
         .autoconnect()
         .sink() {
             _ in
-                        
-            self.list = self.list
+            
+            let result = self.list.drop {
+                item -> Bool in
+                
+                return item.status == .complete || item.status == .failure
+            }
+            
+            self.list = Array(result)
         }
     }
 }
@@ -133,28 +146,42 @@ class DLTaskGenre: DownloadTask, Identifiable {
         super.init(url: url, title: title, shard: shard)
         self.callback = DLCallBack()
         
-        do {
-            try header()
-            downloading()
-        } catch {
-            self.callback?.failure?()
+        DispatchQueue.global().async {
+            do {
+                try self.header()
+                
+                self.downloading()
+            } catch {
+                self.callback?.failure(objects: [
+                    "name": self.file.name,
+                    "createdAt": self.file.createdAt,
+                    "url": self.file.url.absoluteString,
+                    "info": "网络错误"
+                ])
+            }
         }
-
     }
 }
 
 extension DLTaskGenre {
     var process: CGFloat {
         get {
-            let total: Float = threads.reduce(0) { $0 + $1.process }
-            let proportion: Float = total / Float(threads.count)
+            guard   let threads: [DownloadThread] = self.threads,
+                    let size: Int64 = self.file.size else { return -90 }
+            
+            let dl: Int64 = threads.reduce(0) { $0 + ($1.totalBytesWritten ?? 0) }
+            let proportion: Float = Float(dl) / Float(size)
 
-            return CGFloat(proportion * 3.6 - 90)
+            return CGFloat(proportion * 360 - 90)
         }
     }
     
     var speed: Int64 {
         get {
+            guard let threads = self.threads else {
+                return -1
+            }
+            
             let currentTotalBytesWritten: Int64 = threads.reduce(0) {
                 all, current in
 
@@ -170,6 +197,10 @@ extension DLTaskGenre {
 
     var time: Int64 {
         get {
+            guard let threads = self.threads else {
+                return -1
+            }
+            
             var totalTime: Int64 = 0
             for thread in threads {
                 guard let totalBytesExpectedToWrite = thread.totalBytesExpectedToWrite else { break }

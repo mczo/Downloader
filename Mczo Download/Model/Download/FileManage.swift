@@ -20,10 +20,19 @@ class DownloadFileManage {
         self.file = file
         self.full = try! fileManager.url(for: .downloadsDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(file.name)
         self.tmpPath = fileManager.temporaryDirectory
+    }
+    
+    convenience init(normal file: File) {
+        self.init(file: file)
         
         create()
-        
         try! writingFile = FileHandle(forWritingTo: full)
+    }
+    
+    convenience init(continuance file: File) {
+        self.init(file: file)
+        
+        try! writingFile = FileHandle(forUpdating: full)
     }
     
     func create() {
@@ -34,14 +43,7 @@ class DownloadFileManage {
         let _: Bool = fileManager.createFile(atPath: full.path, contents: Data(count: Int(file.size!)), attributes: nil)
     }
     
-    func write(seek: Int64, unUrl: Any) -> Int64 {
-        var url: URL!
-        if let tmpFileName = unUrl as? String {
-            url = self.tmpPath.appendingPathComponent(tmpFileName)
-        } else {
-            url = unUrl as? URL
-        }
-        
+    func write(seek: Int64, url: URL) -> Int64 {
         guard let fileData = self.fileManager.contents(atPath: url.path) else { return 0 }
 
         writingFile?.seek(toFileOffset: UInt64(seek))
@@ -58,6 +60,14 @@ class DownloadFileManage {
     
     func close() {
         writingFile?.closeFile()
+    }
+    
+    func delete() {
+        do {
+            try self.fileManager.removeItem(at: self.full)
+        } catch {
+            print("文件删除失败")
+        }
     }
     
     func check(size: Int64) -> URL {

@@ -23,8 +23,9 @@ class DownloadThread: NSObject {
     var totalBytesExpectedToWrite: Int64?
     var process: Float {
         get {
-            guard let current = totalBytesWritten else { return 0 }
-            guard let total = totalBytesExpectedToWrite else { return 0 }
+            guard   let current = totalBytesWritten,
+                    let total = totalBytesExpectedToWrite else { return 0 }
+            
             return Float(current) / Float(total) * 100
         }
     }
@@ -47,7 +48,6 @@ class DownloadThread: NSObject {
         
     func downloading(callback: @escaping () -> Void) {
         self.completeCallback = callback
-        print("bytes=\(self.file.threads![index].first!)-\(self.file.threads![index].last!)")
         
         self.task?.resume()
     }
@@ -64,19 +64,22 @@ class DownloadThread: NSObject {
             
             guard let matchs = self.REGetTmp.firstMatch(in: unprocess, options: .reportProgress, range: NSRange(location: 0, length: unprocess.count)) else { return }
             let tmpFileName: String = (unprocess as NSString).substring(with: matchs.range)
+            let tmpFilePath: URL = self.downloadFileManage.tmpPath.appendingPathComponent(tmpFileName)
             
-            let fileSize: Int64 = self.downloadFileManage.write(seek: self.file.threads![self.index].first!, unUrl: tmpFileName)
-
-            self.pauseCallback(self.index, self.file.threads![self.index].first! + fileSize)
+            DispatchQueue.main.async {
+                let fileSize: Int64 = self.downloadFileManage.write(seek: self.file.threads![self.index].first!, url: tmpFilePath)
+                self.pauseCallback(self.index, self.file.threads![self.index].first! + fileSize)
+            }
         }
     }
 }
 
 extension DownloadThread: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
-        _ = self.downloadFileManage.write(seek: self.file.threads![self.index].first!, unUrl: location)
-        print(self.index, "complete")
+        _ = self.downloadFileManage.write(seek: self.file.threads![self.index].first!, url: location)
         self.completeCallback()
+        
+//        print(location.path)
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {

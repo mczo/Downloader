@@ -15,6 +15,7 @@
 		A26A538C235DF2B100E92A96 /* SettingMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26A538B235DF2B100E92A96 /* SettingMain.swift */; };
 		A27DB1BE237ADE2E0076CDF9 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27DB1BD237ADE2E0076CDF9 /* Config.swift */; };
 		A28F4531238027EF0082AEB4 /* Downloading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A28F4530238027EF0082AEB4 /* Downloading.swift */; };
+		A29326C42396B08E004FD0C7 /* Failure.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29326C32396B08E004FD0C7 /* Failure.swift */; };
 		A29835A9235F68EF006F2075 /* GlobalSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29835A8235F68EF006F2075 /* GlobalSetting.swift */; };
 		A2B9767123743C8F0085705A /* DLListDownloading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B9767023743C8F0085705A /* DLListDownloading.swift */; };
 		A2DEFFCE234E3AD400792564 /* DLList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DEFFCD234E3AD400792564 /* DLList.swift */; };
@@ -40,6 +41,7 @@
 		A26A538B235DF2B100E92A96 /* SettingMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingMain.swift; sourceTree = "<group>"; };
 		A27DB1BD237ADE2E0076CDF9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		A28F4530238027EF0082AEB4 /* Downloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloading.swift; sourceTree = "<group>"; };
+		A29326C32396B08E004FD0C7 /* Failure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Failure.swift; sourceTree = "<group>"; };
 		A29835A8235F68EF006F2075 /* GlobalSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSetting.swift; sourceTree = "<group>"; };
 		A2B9767023743C8F0085705A /* DLListDownloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListDownloading.swift; sourceTree = "<group>"; };
 		A2DEFFCD234E3AD400792564 /* DLList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLList.swift; sourceTree = "<group>"; };
@@ -140,6 +142,7 @@
 				A27DB1BD237ADE2E0076CDF9 /* Config.swift */,
 				A28F4530238027EF0082AEB4 /* Downloading.swift */,
 				A2E465F3238835A8001687C6 /* Complete.swift */,
+				A29326C32396B08E004FD0C7 /* Failure.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -268,6 +271,7 @@
 				A2E465F8238953A7001687C6 /* DLListFailure.swift in Sources */,
 				A29835A9235F68EF006F2075 /* GlobalSetting.swift in Sources */,
 				A2179B3C234E333B00C78E34 /* ContentView.swift in Sources */,
+				A29326C42396B08E004FD0C7 /* Failure.swift in Sources */,
 				A2DEFFD82350C8B200792564 /* Download.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

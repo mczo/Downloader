@@ -8,11 +8,11 @@
 
 import Foundation
 
-@objc protocol DLCallBackProtocol: class {
-    @objc optional func downloading() -> Void
-    @objc optional func pause() -> Void
-    @objc optional func complete(objects: [String: Any]) -> Void
-    @objc optional func failure() -> Void
+protocol DLCallBackProtocol: class {
+    func downloading() -> Void
+    func pause() -> Void
+    func complete(objects: [String: Any]) -> Void
+    func failure(objects: [String: Any]) -> Void
 }
 
 protocol DLStatusProtocol: class {
@@ -24,8 +24,8 @@ class DownloadTask {
     
     var file: File!
     
-    var threads: [DownloadThread]!
-    private var downloadFileManage: DownloadFileManage?
+    var threads: [DownloadThread]?
+    var downloadFileManage: DownloadFileManage?
     
     var callback: (DLCallBackProtocol & DLStatusProtocol)?
             
@@ -44,7 +44,7 @@ class DownloadTask {
     }
     
     deinit {
-        self.downloadFileManage?.close()
+        print("wc")
     }
     
     private func getHeader() {
@@ -106,10 +106,10 @@ class DownloadTask {
     }
     
     func header() throws {
-        getHeader()
+        self.getHeader()
         if self.file.size == nil { throw DownloadError.notNetwork }
-
-        downloadFileManage = DownloadFileManage(file: self.file)
+        
+        self.downloadFileManage = DownloadFileManage(normal: self.file)
     }
     
     func downloading() {
@@ -117,13 +117,15 @@ class DownloadTask {
         let completeCallback: () -> Void = {
             count += 1
             if count == self.shard {
-                self.callback?.complete?(objects: [
+                self.callback?.complete(objects: [
                     "name": self.file.name,
                     "createdAt": self.file.createdAt,
                     "url": self.file.url.absoluteString,
                     "size": self.file.size ?? 0,
                     "ext": self.file.ext ?? ""
                 ])
+                
+                self.downloadFileManage?.close()
             }
         }
         
@@ -139,11 +141,17 @@ class DownloadTask {
                 file: self.file,
                 index: index)
             
-            threads.append(downloadThread)
             downloadThread.downloading(callback: completeCallback)
+            self.threads?.append(downloadThread)
         }
         
-        self.callback?.downloading?()
+        self.callback?.downloading()
+    }
+    
+    func continuance() {
+        self.downloadFileManage = DownloadFileManage(continuance: self.file)
+        
+        self.downloading()
     }
     
     func pause() {
@@ -155,12 +163,19 @@ class DownloadTask {
             
             count += 1
             if count == self.shard {
-                self.callback?.pause?()
+                self.callback?.pause()
+                
+                self.downloadFileManage?.close()
             }
         }
         
-        for thread in threads {
-            thread.pause(callback: pauseCallback)
+        
+        if let threads = self.threads {
+            for thread in threads {
+                thread.pause(callback: pauseCallback)
+            }
+        } else {
+            return
         }
     }
 }
