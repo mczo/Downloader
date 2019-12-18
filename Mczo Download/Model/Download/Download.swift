@@ -22,19 +22,19 @@ protocol DownloadProtocol {
 struct File: FileProtocol {
     var url: URL
     var name: String
-    var mime: String?
     var size: Int64?
     var threads: [[Int64]]?
     var createdAt: Date
     var ext: String?
+    var proportion: Float?
 }
 
 protocol FileProtocol {
     var url: URL { get set }
     var name: String { get set }
-    var mime: String? { get set }
     var size: Int64? { get set }
     var threads: [[Int64]]? { get set }
     var createdAt: Date { get set }
     var ext: String? { get set }
+    var proportion: Float? { get set }
 }

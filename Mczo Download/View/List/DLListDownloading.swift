@@ -50,7 +50,7 @@ struct DLListDownloading: View {
                 }
             }
             
-            NavigationLink(destination: Text("a")) {
+            NavigationLink(destination: DLListInfo()) {
                 VStack {
                     HStack {
                         Text("\(item.file.name)")
@@ -85,21 +85,30 @@ struct DLListDownloading: View {
 class DLCallBack: DLCallBackProtocol, DLStatusProtocol {
     var status: DLStatus = .wait
     
-    let CompleteModelOperat: ModelOperat = ModelOperat<ModelComplete>()
+    let downloadingModelOperat: ModelOperat = ModelOperat<ModelDownloading>()
+    let completeModelOperat: ModelOperat = ModelOperat<ModelComplete>()
     let failureModelOperat: ModelOperat = ModelOperat<ModelFailure>()
+    
+    func head(objects: [String: Any]) {
+        self.downloadingModelOperat.insert(objects: objects)
+    }
     
     func downloading() {
         self.status = .downloading
     }
     
-    func pause() {
+    func pause(objects: [String: Any]) {
         self.status = .pause
+        
+        self.downloadingModelOperat.update(name: objects["name"] as! String, objects: objects)
     }
     
     func complete(objects: [String: Any]) {
         self.status = .complete
         
-        self.CompleteModelOperat.insert(objects: objects)
+        self.completeModelOperat.insert(objects: objects)
+        
+        self.downloadingModelOperat.delete(name: objects["name"] as! String)
     }
     
     func failure(objects: [String: Any]) {
@@ -115,6 +124,22 @@ class DownloadingManage: ObservableObject {
     private var cancellable: AnyCancellable?
     
     init() {
+        let res = ModelOperat<ModelDownloading>().fetch()
+        for item in res {
+            let unarchiveObject = try! NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(item.threads)
+            let threadsObject = unarchiveObject as! [[Int64]]
+            let file: File = File(
+                url: URL(string: item.url)!,
+                name: item.name,
+                size: item.size,
+                threads: threadsObject,
+                createdAt: item.createdAt,
+                ext: item.ext,
+                proportion: item.proportion)
+            
+            self.list.append( DLTaskGenre(continuance: file, shard: Int8(item.shard)) )
+        }
+        
         cancellable = Timer.publish(every: 1, on: .main, in: .common)
         .autoconnect()
         .sink() {
@@ -134,31 +159,11 @@ class DownloadingManage: ObservableObject {
 class DLTaskGenre: DownloadTask, Identifiable {
     var id: UUID = UUID()
     
-    private var prevTotalBytesWritten: Int64 = 0
+    private var prevTotalBytesWritten: [Int64] = [0, 0]
     
     var status: DLStatus {
         get {
             self.callback!.status
-        }
-    }
-    
-    override init(url: String, title: String, shard: Int8) {
-        super.init(url: url, title: title, shard: shard)
-        self.callback = DLCallBack()
-        
-        DispatchQueue.global().async {
-            do {
-                try self.header()
-                
-                self.downloading()
-            } catch {
-                self.callback?.failure(objects: [
-                    "name": self.file.name,
-                    "createdAt": self.file.createdAt,
-                    "url": self.file.url.absoluteString,
-                    "info": "网络错误"
-                ])
-            }
         }
     }
 }
@@ -167,10 +172,10 @@ extension DLTaskGenre {
     var process: CGFloat {
         get {
             guard   let threads: [DownloadThread] = self.threads,
-                    let size: Int64 = self.file.size else { return -90 }
+                let size: Int64 = self.file.size else { return CGFloat((self.file.proportion ?? 0) * 360 - 90) }
             
             let dl: Int64 = threads.reduce(0) { $0 + ($1.totalBytesWritten ?? 0) }
-            let proportion: Float = Float(dl) / Float(size)
+            let proportion: Float = Float(dl) / Float(size) + (self.file.proportion ?? 0)
 
             return CGFloat(proportion * 360 - 90)
         }
@@ -189,28 +194,31 @@ extension DLTaskGenre {
                 return all + totalBytesWritten
             }
             
-            let currentSpeed: Int64 = currentTotalBytesWritten - prevTotalBytesWritten
-            prevTotalBytesWritten = currentTotalBytesWritten
+            let currentSpeed: Int64 = currentTotalBytesWritten - self.prevTotalBytesWritten[0]
+            self.prevTotalBytesWritten[0] = currentTotalBytesWritten
             return currentSpeed
         }
     }
 
     var time: Int64 {
         get {
-            guard let threads = self.threads else {
-                return -1
-            }
+            guard   let size = self.file.size,
+                    let threads = self.threads else {
+                        return -1
+                    }
             
-            var totalTime: Int64 = 0
-            for thread in threads {
-                guard let totalBytesExpectedToWrite = thread.totalBytesExpectedToWrite else { break }
-                guard let totalBytesWritten = thread.totalBytesWritten else { break }
-                guard let bytesWritten = thread.bytesWritten else { break }
-                
-                totalTime += (totalBytesExpectedToWrite - totalBytesWritten) / bytesWritten
-            }
+            let currentTotalBytesWritten: Int64 = threads.reduce(0) {
+                all, current in
 
-            return totalTime
+                guard let totalBytesWritten = current.totalBytesWritten else { return 0 }
+                return all + totalBytesWritten
+            }
+            let currentSpeed: Int64 = currentTotalBytesWritten - self.prevTotalBytesWritten[1]
+            self.prevTotalBytesWritten[1] = currentTotalBytesWritten
+            
+            if currentSpeed == 0 { return -1 }
+            let time: Int64 = (size - currentTotalBytesWritten) / currentSpeed
+            return time
         }
     }
 }

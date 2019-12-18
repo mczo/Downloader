@@ -32,8 +32,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             window.rootViewController = UIHostingController(rootView: contentView)
             self.window = window
             window.makeKeyAndVisible()
-            
-//            DownloadTask(url: "https://d1.music.126.net/dmusic/8962/2019827153711/NeteaseMusic_2.2.0_800_web.dmg", shard: 10)
         }
     }
 

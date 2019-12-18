@@ -28,6 +28,12 @@ extension Managed {
             return [sortDescriptors]
         }
     }
+    
+    static var defaultFetchRequest: NSFetchRequest<Self> {
+        get {
+            return NSFetchRequest<Self>(entityName: entityName)
+        }
+    }
 
     static var sortedFetchRequest: NSFetchRequest<Self> {
         get {
@@ -44,33 +50,50 @@ extension Managed where Self: NSManagedObject {
     }
 }
 
-struct ModelOperat<Model> where Model: NSManagedObject {
+struct ModelOperat<Model> where Model: CoreDataDownload & Managed {
     let context: NSManagedObjectContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
+    func fetch() -> [Model] {
+        let fetchRequest = Model.defaultFetchRequest
+        var requests: [Model] = Array()
+        
+        do {
+            requests = try self.context.fetch(fetchRequest)
+        } catch {
+            print(error)
+        }
+        
+        return requests
+    }
     
     func insert(objects: [String: Any]) -> Void {
         let model = Model(context: self.context)
-
-        for (key, value) in objects {
-            switch value {
-            case let val where val is String:
-                model.setValue(value as! String, forKey: key)
-                
-            case let val where val is Date:
-                model.setValue(value as! Date, forKey: key)
-                
-            case let val where val is Int64:
-                model.setValue(value as! Int64, forKey: key)
-                
-            default:
-                break
-            }
-        }
-                
+        model.setValuesForKeys(objects)
+        
         do {
             try self.context.save()
         } catch {
             print("error")
         }
+    }
+    
+    func update(name: String, objects: [String: Any]) -> Void {
+        let fetchRequest = Model.defaultFetchRequest
+        let predicate: NSPredicate = NSPredicate(format: "name == %@", NSString(string: name))
+        fetchRequest.predicate = predicate
+        
+        do {
+            let requests = try self.context.fetch(fetchRequest)
+            if requests.count == 1 {
+                let request = requests.first!
+                request.setValuesForKeys(objects)
+                
+                try self.context.save()
+            }
+        } catch {
+            print(error)
+        }
+
     }
     
     func delete(item: NSManagedObject) {
@@ -80,6 +103,24 @@ struct ModelOperat<Model> where Model: NSManagedObject {
             try self.context.save()
         } catch {
             print("error")
+        }
+    }
+    
+    func delete(name: String) {
+        let fetchRequest = Model.defaultFetchRequest
+        let predicate: NSPredicate = NSPredicate(format: "name == %@", NSString(string: name))
+        fetchRequest.predicate = predicate
+        
+        do {
+            let requests = try self.context.fetch(fetchRequest)
+            if requests.count == 1 {
+                let request = requests.first!
+                self.context.delete(request)
+                
+                try self.context.save()
+            }
+        } catch {
+            print(error)
         }
     }
 }

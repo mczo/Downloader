@@ -10,10 +10,9 @@ import Foundation
 import CoreData
 
 public class ModelDownloading: CoreDataDownload, Managed {
-    @NSManaged public var mime: String
+    @NSManaged public var ext: String
     @NSManaged public var size: Int64
-}
-
-extension ModelDownloading {
-    
+    @NSManaged public var threads: Data
+    @NSManaged public var proportion: Float
+    @NSManaged public var shard: Int16
 }

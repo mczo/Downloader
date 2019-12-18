@@ -21,14 +21,6 @@ class DownloadThread: NSObject {
     var bytesWritten: Int64?
     var totalBytesWritten: Int64?
     var totalBytesExpectedToWrite: Int64?
-    var process: Float {
-        get {
-            guard   let current = totalBytesWritten,
-                    let total = totalBytesExpectedToWrite else { return 0 }
-            
-            return Float(current) / Float(total) * 100
-        }
-    }
     
     var completeCallback: (() -> Void)!
     var pauseCallback: ((_ index: Int, _ breakpoint: Int64) -> Void)!

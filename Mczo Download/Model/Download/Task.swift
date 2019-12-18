@@ -9,8 +9,9 @@
 import Foundation
 
 protocol DLCallBackProtocol: class {
+    func head(objects: [String: Any]) -> Void
     func downloading() -> Void
-    func pause() -> Void
+    func pause(objects: [String: Any]) -> Void
     func complete(objects: [String: Any]) -> Void
     func failure(objects: [String: Any]) -> Void
 }
@@ -40,7 +41,36 @@ class DownloadTask {
         self.file = File(
             url: self.url,
             name: self.url.lastPathComponent,
-            createdAt: Date())
+            createdAt: Date()
+        )
+        
+        self.callback = DLCallBack()
+        
+        DispatchQueue.global().async {
+            do {
+                try self.header()
+                
+                self.downloading()
+            } catch {
+                self.callback?.failure(objects: [
+                    "name": self.file.name,
+                    "createdAt": self.file.createdAt,
+                    "url": self.file.url.absoluteString,
+                    "info": "网络错误"
+                ])
+            }
+        }
+    }
+    
+    init(continuance file: File, shard: Int8) {
+        self.shard = shard
+        self.title = file.name
+        self.url = file.url
+        
+        self.file = file
+        
+        self.callback = DLCallBack()
+        self.callback?.status = .pause
     }
     
     deinit {
@@ -92,7 +122,6 @@ class DownloadTask {
                 self.file = File(
                         url: res.url!,
                         name: self.title,
-                        mime: res.value(forHTTPHeaderField: "Content-Type")!,
                         size: size,
                         threads: threads,
                         createdAt: self.file.createdAt,
@@ -110,6 +139,15 @@ class DownloadTask {
         if self.file.size == nil { throw DownloadError.notNetwork }
         
         self.downloadFileManage = DownloadFileManage(normal: self.file)
+        
+        self.callback?.head(objects: [
+            "name": self.file.name,
+            "createdAt": self.file.createdAt,
+            "url": self.file.url.absoluteString,
+            "size": self.file.size ?? 0,
+            "ext": self.file.ext ?? "",
+            "shard": Int16(self.shard!)
+        ])
     }
     
     func downloading() {
@@ -130,10 +168,12 @@ class DownloadTask {
         }
         
         guard let threadSeeds = self.file.threads else { return }
+        
         self.threads = Array()
         for index in 0..<threadSeeds.count {
             if threadSeeds[index].first == threadSeeds[index].last {
-                print("same")
+                self.shard -= 1
+                continue
             }
             
             let downloadThread = DownloadThread(
@@ -163,7 +203,20 @@ class DownloadTask {
             
             count += 1
             if count == self.shard {
-                self.callback?.pause()
+                let threadsData: Data = try! NSKeyedArchiver.archivedData(withRootObject: self.file!.threads ?? Array(), requiringSecureCoding: true)
+                
+                if  let dl: Int64 = self.threads?.reduce(0, { $0 + ($1.totalBytesWritten ?? 0) }),
+                    let size: Int64 = self.file.size {
+                    self.file.proportion = Float(dl) / Float(size)
+                    
+                    self.threads = nil
+                } else { self.file.proportion = 0 }
+                
+                self.callback?.pause(objects: [
+                    "name": self.file.name,
+                    "threads": threadsData,
+                    "proportion": self.file.proportion ?? 0
+                ])
                 
                 self.downloadFileManage?.close()
             }
