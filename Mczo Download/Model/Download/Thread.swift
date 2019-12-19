@@ -71,7 +71,7 @@ extension DownloadThread: URLSessionDownloadDelegate {
         _ = self.downloadFileManage.write(seek: self.file.threads![self.index].first!, url: location)
         self.completeCallback()
         
-//        print(location.path)
+        print(location.path)
     }
 
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didWriteData bytesWritten: Int64, totalBytesWritten: Int64, totalBytesExpectedToWrite: Int64) {

@@ -115,18 +115,15 @@ class DownloadTask {
                     threads.append([startSeed, endSeed])
                 }
 
-                if self.title.isEmpty {
-                    self.title = response?.suggestedFilename
-                }
-
+                let fileName: String = response?.suggestedFilename ?? self.url.lastPathComponent
+                let fileExt: String = URL(fileURLWithPath: fileName).pathExtension
                 self.file = File(
                         url: res.url!,
-                        name: self.title,
+                        name: self.title.isEmpty ? fileName : self.title + "." + fileExt,
                         size: size,
                         threads: threads,
                         createdAt: self.file.createdAt,
-                        ext: URL(fileURLWithPath: self.title).pathExtension
-                )
+                        ext: fileExt)
                 
                 sema.signal()
             }.resume()

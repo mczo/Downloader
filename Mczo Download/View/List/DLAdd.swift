@@ -14,8 +14,8 @@ struct DLAdd: View {
     @ObservedObject private var globalSetting: GlobalSettings = GlobalSettings()
     @ObservedObject var downloadingManage: DownloadingManage
     
-//    @State private var formURL: String = "https://d1.music.126.net/dmusic/8962/2019827153711/NeteaseMusic_2.2.0_800_web.dmg"
-    @State private var formURL: String = "https://qd.myapp.com/myapp/qqteam/pcqq/PCQQ2019.exe"
+    @State private var formURL: String = "https://d1.music.126.net/dmusic/8962/2019827153711/NeteaseMusic_2.2.0_800_web.dmg"
+//    @State private var formURL: String = "https://qd.myapp.com/myapp/qqteam/pcqq/PCQQ2019.exe"
     @State private var formTitle: String = String()
     
     var body: some View {
