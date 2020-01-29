@@ -48,6 +48,7 @@ struct DLListComplete: View {
                 }
                 .modifier(DLCompositionDescription())
             }
+            
             .onTapGesture {
                 self.shareShow.toggle()
             }
