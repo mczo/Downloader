@@ -9,32 +9,32 @@
 import SwiftUI
 
 struct SettingMain: View {
-    @ObservedObject private var global: GlobalSettings = GlobalSettings()
+    @EnvironmentObject private var globalSetting: GlobalSettings
     
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("一般")) {
-                    Toggle(isOn: $global.general.complentedDel) {
+                    Toggle(isOn: $globalSetting.general.complentedDel) {
                         Text("分享后删除")
                     }
                 }
                 
                 Section(header: Text("下载")) {
-                    NavigationLink(destination: SettingMainThread(thread: $global.download.thread)) {
+                    NavigationLink(destination: SettingMainThread(thread: $globalSetting.download.thread)) {
                         HStack {
                             Text("最多任务")
                             Spacer()
-                            Text("\(global.download.thread.toInt)")
+                            Text("\(Int8(globalSetting.download.thread))")
                                 .foregroundColor(.secondary)
                         }
                     }
                     
-                    NavigationLink(destination: SettingMainShared(shard: $global.download.shard)) {
+                    NavigationLink(destination: SettingMainShared(shard: $globalSetting.download.shard)) {
                         HStack {
                             Text("线程数")
                             Spacer()
-                            Text("\(global.download.shard.toInt)")
+                            Text("\(Int8(globalSetting.download.shard))")
                                 .foregroundColor(.secondary)
 
                         }
@@ -64,7 +64,7 @@ struct SettingMainThread: View {
                 in: 1...15,
                 step: 1)
                 .padding(.horizontal)
-            Text("最多下载任务数: \(thread.toInt)")
+            Text("最多下载任务数: \(Int8(thread))")
         }
     }
 }
@@ -79,14 +79,8 @@ struct SettingMainShared: View {
                 in: 1...128,
                 step: 1)
                 .padding(.horizontal)
-            Text("下载线程: \(shard.toInt)")
+            Text("下载线程: \(Int8(shard))")
             
         }
-    }
-}
-
-extension Float {
-    var toInt: Int {
-        return Int(self)
     }
 }

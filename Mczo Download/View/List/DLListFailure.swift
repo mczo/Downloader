@@ -9,10 +9,8 @@
 import SwiftUI
 
 struct DLListFailure: View {
-    @ObservedObject var downloadingManage: DownloadingManage
+    @EnvironmentObject var downloadingManage: DownloadingManage
     @FetchRequest(fetchRequest: ModelFailure.sortedFetchRequest) var failureList: FetchedResults<ModelFailure>
-    
-    let modelOperat: ModelOperat = ModelOperat<ModelFailure>()
     
     var body: some View {
         ForEach(failureList) {
@@ -33,6 +31,9 @@ struct DLListFailure: View {
                 }
                 .modifier(DLCompositionDescription())
             }
+            .contextMenu {
+                DLListMenu(item: item, type: .failure)
+            }
         }
         .onDelete {
             indexSet in
@@ -40,11 +41,7 @@ struct DLListFailure: View {
             guard let index = indexSet.first else { return }
             
             let item = self.failureList[index]
-
-            let file: File = File(url: URL(string: item.url)!,
-                                  name: item.name,
-                                  createdAt: item.createdAt)
-            DownloadFileManage(file: file).delete()
-            
-            self.modelOperat.delete(item: item)
-        }    }}
+            fileOperat(item).del()
+        }
+    }
+}

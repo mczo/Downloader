@@ -147,11 +147,18 @@ class DownloadTask {
         ])
     }
     
+    private var dlComplete: Int8 = 0
     func downloading() {
-        var count: Int8 = 0
-        let completeCallback: () -> Void = {
-            count += 1
-            if count == self.shard {
+        let completeCallback: (_ index: Int) -> Void = {  // 下载完成
+            index in
+            
+            // 完成数 +1
+            self.dlComplete += 1
+            
+            // 下载完成线程的字节数修改
+            self.file!.threads![index][0] = self.file!.threads![index][1]
+            
+            if self.dlComplete == self.shard {
                 self.callback?.complete(objects: [
                     "name": self.file.name,
                     "createdAt": self.file.createdAt,
@@ -169,7 +176,7 @@ class DownloadTask {
         self.threads = Array()
         for index in 0..<threadSeeds.count {
             if threadSeeds[index].first == threadSeeds[index].last {
-                self.shard -= 1
+                self.dlComplete += 1
                 continue
             }
             
@@ -188,10 +195,13 @@ class DownloadTask {
     func continuance() {
         self.downloadFileManage = DownloadFileManage(continuance: self.file)
         
+        self.dlComplete = 0
         self.downloading()
     }
     
     func pause() {
+        guard let threads = self.threads else { return }
+        
         var count: Int8 = 0
         let pauseCallback: (_ index: Int, _ breakpoint: Int64) -> Void = {
             index, breakpoint in
@@ -199,7 +209,7 @@ class DownloadTask {
             self.file!.threads?[index][0] = breakpoint
             
             count += 1
-            if count == self.shard {
+            if count == self.shard - self.dlComplete {
                 let threadsData: Data = try! NSKeyedArchiver.archivedData(withRootObject: self.file!.threads ?? Array(), requiringSecureCoding: true)
                 
                 if  let dl: Int64 = self.threads?.reduce(0, { $0 + ($1.totalBytesWritten ?? 0) }),
@@ -219,13 +229,26 @@ class DownloadTask {
             }
         }
         
-        
+        for thread in threads {
+            thread.pause(callback: pauseCallback)
+        }
+    }
+    
+    func cancel() {
         if let threads = self.threads {
             for thread in threads {
-                thread.pause(callback: pauseCallback)
+                thread.cancel()
             }
-        } else {
-            return
         }
+        
+        self.callback?.failure(objects: [
+            "name": self.file.name,
+            "createdAt": self.file.createdAt,
+            "url": self.file.url.absoluteString,
+            "info": "停止下载"
+        ])
+        
+        self.downloadFileManage?.close()
+        self.downloadFileManage?.delete()
     }
 }

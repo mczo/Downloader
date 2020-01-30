@@ -22,7 +22,7 @@ class DownloadThread: NSObject {
     var totalBytesWritten: Int64?
     var totalBytesExpectedToWrite: Int64?
     
-    var completeCallback: (() -> Void)!
+    var completeCallback: ((_ index: Int) -> Void)!
     var pauseCallback: ((_ index: Int, _ breakpoint: Int64) -> Void)!
     
     init(downloadFileManage: DownloadFileManage, file: File, index: Int) {
@@ -38,7 +38,7 @@ class DownloadThread: NSObject {
         self.task = session.downloadTask(with: request)
     }
         
-    func downloading(callback: @escaping () -> Void) {
+    func downloading(callback: @escaping (_ index: Int) -> Void) {
         self.completeCallback = callback
         
         self.task?.resume()
@@ -64,12 +64,16 @@ class DownloadThread: NSObject {
             }
         }
     }
+    
+    func cancel() {
+        self.task?.cancel()
+    }
 }
 
 extension DownloadThread: URLSessionDownloadDelegate {
     func urlSession(_ session: URLSession, downloadTask: URLSessionDownloadTask, didFinishDownloadingTo location: URL) {
         _ = self.downloadFileManage.write(seek: self.file.threads![self.index].first!, url: location)
-        self.completeCallback()
+        self.completeCallback(self.index)
         
         print(location.path)
     }

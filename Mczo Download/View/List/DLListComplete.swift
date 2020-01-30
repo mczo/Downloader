@@ -9,12 +9,11 @@
 import SwiftUI
 
 struct DLListComplete: View {
-    @ObservedObject var downloadingManage: DownloadingManage
+    @EnvironmentObject var downloadingManage: DownloadingManage
+    @EnvironmentObject private var globalSetting: GlobalSettings
     @FetchRequest(fetchRequest: ModelComplete.sortedFetchRequest) var completeList: FetchedResults<ModelComplete>
-    @ObservedObject private var globalSetting: GlobalSettings = GlobalSettings()
     
-    private let modelOperat: ModelOperat = ModelOperat<ModelComplete>()
-    private let downloadURL: URL = try! FileManager.default.url(for: .downloadsDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
+    @State private var shareShow: Bool = false
     
     private var dateFormatter: DateFormatter {
         get {
@@ -23,8 +22,6 @@ struct DLListComplete: View {
             return dateFormatter
         }
     }
-    
-    @State private var shareShow: Bool = false
     
     var body: some View {
         ForEach(completeList) {
@@ -48,25 +45,13 @@ struct DLListComplete: View {
                 }
                 .modifier(DLCompositionDescription())
             }
-            
+            .contentShape(Rectangle())
             .onTapGesture {
                 self.shareShow.toggle()
             }
-            .sheet(isPresented: self.$shareShow, content: { ActivityViewController(fileName: item.name, delete: self.globalSetting.general.complentedDel) })
+            .sheet(isPresented: self.$shareShow, content: { ActivityViewController(fileOperats: [fileOperat(item)], delete: self.globalSetting.general.complentedDel) })
             .contextMenu {
-                Group {
-                    Button(action: {
-                        print("a")
-                    }) {
-                        Text("暂停")
-                    }
-                    
-                    Button(action: {
-                        print("a")
-                    }) {
-                        Text("继续")
-                    }
-                }
+                DLListMenu(item: item, type: .complete)
             }
         }
         .onDelete {
@@ -76,42 +61,40 @@ struct DLListComplete: View {
             
             let item = self.completeList[index]
 
-            let file: File = File(url: URL(string: item.url)!,
-                                  name: item.name,
-                                  createdAt: item.createdAt)
-            DownloadFileManage(file: file).delete()
-            
-            self.modelOperat.delete(item: item)
+            fileOperat(item).del()
         }
     }
 }
 
-private struct ActivityViewController: UIViewControllerRepresentable {
-    var activityItems: [URL]
-    var applicationActivities: [UIActivity]? = nil
-    var delete: Bool
-    
-    let fileManager: FileManager = FileManager.default
-    
-    init(fileName: String, delete: Bool) {
-        let filePath = try! self.fileManager.url(for: .downloadsDirectory, in: .userDomainMask, appropriateFor: nil, create: true).appendingPathComponent(fileName)
-        self.activityItems = [filePath]
-        
+
+
+fileprivate struct ActivityViewController: UIViewControllerRepresentable {
+    var activityItems: [URL] = Array()
+    let applicationActivities: [UIActivity]? = nil
+    let delete: Bool
+    let fileOperats: [fileOperat]
+
+    init(fileOperats: [fileOperat], delete: Bool) {
+        for operat in fileOperats {
+            self.activityItems.append(operat.dfm.full)
+        }
+
         self.delete = delete
+        self.fileOperats = fileOperats
     }
 
     func makeUIViewController(context: UIViewControllerRepresentableContext<ActivityViewController>) -> UIActivityViewController {
         let controller = UIActivityViewController(activityItems: activityItems, applicationActivities: applicationActivities)
         controller.completionWithItemsHandler = {
             (activityType: UIActivity.ActivityType?, completed: Bool, returnedItems: [Any]?, error: Error?) in
-            
+
             if error != nil {
                 return
             }
-            
+
             if completed && self.delete {
-                for file in self.activityItems {
-                    try! self.fileManager.removeItem(at: file)
+                for operat in self.fileOperats {
+                    operat.del()
                 }
             }
         }

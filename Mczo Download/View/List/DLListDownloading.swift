@@ -10,7 +10,7 @@ import SwiftUI
 import Combine
 
 struct DLListDownloading: View {
-    @ObservedObject var downloadingManage: DownloadingManage
+    @EnvironmentObject var downloadingManage: DownloadingManage
     @State private var spin: Bool = false
     
     private func listItem(item: DLTaskGenre) -> some View {
@@ -32,7 +32,7 @@ struct DLListDownloading: View {
 
                         Group {
                             if item.status == DLStatus.downloading {
-                                Image(systemName: "stop.fill")
+                                Image(systemName: "pause.fill")
                             } else if item.status == DLStatus.pause {
                                 Image(systemName: "play.fill")
                             }
@@ -70,6 +70,39 @@ struct DLListDownloading: View {
                 }
             }
         }
+        .contextMenu {
+            if item.status == DLStatus.downloading {
+                Button(action: {
+                    item.pause()
+                }) {
+                    Text("暂停")
+                    Image(systemName: "pause.fill")
+                }
+            }
+            
+            if item.status == DLStatus.pause {
+                Button(action: {
+                    item.continuance()
+                }) {
+                    Text("继续")
+                    Image(systemName: "play.fill")
+                }
+            }
+            
+            Button(action: {
+                item.cancel()
+            }) {
+                Text("取消")
+                Image(systemName: "stop.fill")
+            }
+            
+            Button(action: {
+                UIPasteboard.general.string = item.url.absoluteString
+            }) {
+                Text("复制链接")
+                Image(systemName: "link")
+            }
+        }
     }
     
     var body: some View {
@@ -85,6 +118,7 @@ struct DLListDownloading: View {
 class DLCallBack: DLCallBackProtocol, DLStatusProtocol {
     var status: DLStatus = .wait
     
+    // 获得 CoreData 实例
     let downloadingModelOperat: ModelOperat = ModelOperat<ModelDownloading>()
     let completeModelOperat: ModelOperat = ModelOperat<ModelComplete>()
     let failureModelOperat: ModelOperat = ModelOperat<ModelFailure>()
@@ -114,11 +148,12 @@ class DLCallBack: DLCallBackProtocol, DLStatusProtocol {
     func failure(objects: [String: Any]) {
         self.status = .failure
         
+        self.downloadingModelOperat.delete(name: objects["name"] as! String)
         self.failureModelOperat.insert(objects: objects)
     }
 }
 
-class DownloadingManage: ObservableObject {
+final class DownloadingManage: ObservableObject {
     @Published var list: [DLTaskGenre] = []
     
     private var cancellable: AnyCancellable?

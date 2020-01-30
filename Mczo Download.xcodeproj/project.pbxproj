@@ -17,6 +17,7 @@
 		A28F4531238027EF0082AEB4 /* Downloading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A28F4530238027EF0082AEB4 /* Downloading.swift */; };
 		A29326C42396B08E004FD0C7 /* Failure.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29326C32396B08E004FD0C7 /* Failure.swift */; };
 		A29835A9235F68EF006F2075 /* GlobalSetting.swift in Sources */ = {isa = PBXBuildFile; fileRef = A29835A8235F68EF006F2075 /* GlobalSetting.swift */; };
+		A2A6D59B23E28CB900358C63 /* DLListMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2A6D59A23E28CB900358C63 /* DLListMenu.swift */; };
 		A2B81ED523A50808004FC0A4 /* DLListInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B81ED423A50808004FC0A4 /* DLListInfo.swift */; };
 		A2B9767123743C8F0085705A /* DLListDownloading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2B9767023743C8F0085705A /* DLListDownloading.swift */; };
 		A2DEFFCE234E3AD400792564 /* DLList.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2DEFFCD234E3AD400792564 /* DLList.swift */; };
@@ -44,6 +45,7 @@
 		A28F4530238027EF0082AEB4 /* Downloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloading.swift; sourceTree = "<group>"; };
 		A29326C32396B08E004FD0C7 /* Failure.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Failure.swift; sourceTree = "<group>"; };
 		A29835A8235F68EF006F2075 /* GlobalSetting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GlobalSetting.swift; sourceTree = "<group>"; };
+		A2A6D59A23E28CB900358C63 /* DLListMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListMenu.swift; sourceTree = "<group>"; };
 		A2B81ED423A50808004FC0A4 /* DLListInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListInfo.swift; sourceTree = "<group>"; };
 		A2B9767023743C8F0085705A /* DLListDownloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListDownloading.swift; sourceTree = "<group>"; };
 		A2DEFFCD234E3AD400792564 /* DLList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLList.swift; sourceTree = "<group>"; };
@@ -127,6 +129,7 @@
 				A2E465F523894FCD001687C6 /* DLListComplete.swift */,
 				A2E465F7238953A7001687C6 /* DLListFailure.swift */,
 				A2B81ED423A50808004FC0A4 /* DLListInfo.swift */,
+				A2A6D59A23E28CB900358C63 /* DLListMenu.swift */,
 			);
 			path = List;
 			sourceTree = "<group>";
@@ -272,6 +275,7 @@
 				A2E465EE2386C1EF001687C6 /* Task.swift in Sources */,
 				A2179B37234E333B00C78E34 /* SceneDelegate.swift in Sources */,
 				A2E465F8238953A7001687C6 /* DLListFailure.swift in Sources */,
+				A2A6D59B23E28CB900358C63 /* DLListMenu.swift in Sources */,
 				A2B81ED523A50808004FC0A4 /* DLListInfo.swift in Sources */,
 				A29835A9235F68EF006F2075 /* GlobalSetting.swift in Sources */,
 				A2179B3C234E333B00C78E34 /* ContentView.swift in Sources */,

@@ -9,11 +9,12 @@
 import SwiftUI
 
 struct DLList: View {
+    @EnvironmentObject private var downloadingManage: DownloadingManage
+    @EnvironmentObject private var globalSetting: GlobalSettings
+    
     @State private var selection: DLStatus = .downloading
     @State private var DLAddPresented: Bool = false
     @State private var isEdit: Bool = false
-    
-    @ObservedObject var downloadingManage: DownloadingManage = DownloadingManage()
     
     private var selectionView: some View {
         Section {
@@ -34,11 +35,11 @@ struct DLList: View {
                 
                 Section {
                     if selection == DLStatus.downloading {
-                        DLListDownloading(downloadingManage: downloadingManage)
+                        DLListDownloading()
                     } else if selection == DLStatus.complete {
-                        DLListComplete(downloadingManage: downloadingManage)
+                        DLListComplete()
                     } else if selection == DLStatus.failure {
-                        DLListFailure(downloadingManage: downloadingManage)
+                        DLListFailure()
                     }
 
                 }
@@ -58,9 +59,8 @@ struct DLList: View {
             )
             .sheet(
                 isPresented: self.$DLAddPresented,
-                onDismiss: {},
                 content: {
-                    DLAdd(DLAddPresented: self.$DLAddPresented, downloadingManage: self.downloadingManage)
+                    DLAdd(downloadingManage: self.downloadingManage, globalSetting: self.globalSetting, DLAddPresented: self.$DLAddPresented)
                 }
             )
         }

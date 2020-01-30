@@ -50,7 +50,14 @@ extension Managed where Self: NSManagedObject {
     }
 }
 
-struct ModelOperat<Model> where Model: CoreDataDownload & Managed {
+protocol ModelOperatProtocol {
+    func insert(objects: [String: Any])
+    func update(name: String, objects: [String: Any])
+    func delete(item: NSManagedObject)
+    func delete(name: String)
+}
+
+struct ModelOperat<Model>: ModelOperatProtocol where Model: CoreDataDownload & Managed {
     let context: NSManagedObjectContext = (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
     
     func fetch() -> [Model] {
@@ -66,7 +73,7 @@ struct ModelOperat<Model> where Model: CoreDataDownload & Managed {
         return requests
     }
     
-    func insert(objects: [String: Any]) -> Void {
+    func insert(objects: [String: Any]) {
         let model = Model(context: self.context)
         model.setValuesForKeys(objects)
         
@@ -77,7 +84,7 @@ struct ModelOperat<Model> where Model: CoreDataDownload & Managed {
         }
     }
     
-    func update(name: String, objects: [String: Any]) -> Void {
+    func update(name: String, objects: [String: Any]) {
         let fetchRequest = Model.defaultFetchRequest
         let predicate: NSPredicate = NSPredicate(format: "name == %@", NSString(string: name))
         fetchRequest.predicate = predicate
