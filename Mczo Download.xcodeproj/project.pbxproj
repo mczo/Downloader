@@ -12,6 +12,7 @@
 		A2179B3C234E333B00C78E34 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2179B3B234E333B00C78E34 /* ContentView.swift */; };
 		A2179B3E234E333C00C78E34 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2179B3D234E333C00C78E34 /* Assets.xcassets */; };
 		A2179B41234E333C00C78E34 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A2179B40234E333C00C78E34 /* Preview Assets.xcassets */; };
+		A230216223E55F4C002D4B99 /* SwiftUIView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A230216123E55F4C002D4B99 /* SwiftUIView.swift */; };
 		A26A538C235DF2B100E92A96 /* SettingMain.swift in Sources */ = {isa = PBXBuildFile; fileRef = A26A538B235DF2B100E92A96 /* SettingMain.swift */; };
 		A27DB1BE237ADE2E0076CDF9 /* Config.swift in Sources */ = {isa = PBXBuildFile; fileRef = A27DB1BD237ADE2E0076CDF9 /* Config.swift */; };
 		A28F4531238027EF0082AEB4 /* Downloading.swift in Sources */ = {isa = PBXBuildFile; fileRef = A28F4530238027EF0082AEB4 /* Downloading.swift */; };
@@ -40,6 +41,7 @@
 		A2179B3D234E333C00C78E34 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		A2179B40234E333C00C78E34 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		A2179B45234E333C00C78E34 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A230216123E55F4C002D4B99 /* SwiftUIView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUIView.swift; sourceTree = "<group>"; };
 		A26A538B235DF2B100E92A96 /* SettingMain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingMain.swift; sourceTree = "<group>"; };
 		A27DB1BD237ADE2E0076CDF9 /* Config.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Config.swift; sourceTree = "<group>"; };
 		A28F4530238027EF0082AEB4 /* Downloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Downloading.swift; sourceTree = "<group>"; };
@@ -130,6 +132,7 @@
 				A2E465F7238953A7001687C6 /* DLListFailure.swift */,
 				A2B81ED423A50808004FC0A4 /* DLListInfo.swift */,
 				A2A6D59A23E28CB900358C63 /* DLListMenu.swift */,
+				A230216123E55F4C002D4B99 /* SwiftUIView.swift */,
 			);
 			path = List;
 			sourceTree = "<group>";
@@ -262,6 +265,7 @@
 			files = (
 				A2E465F22386C21B001687C6 /* FileManage.swift in Sources */,
 				A28F4531238027EF0082AEB4 /* Downloading.swift in Sources */,
+				A230216223E55F4C002D4B99 /* SwiftUIView.swift in Sources */,
 				A2E465F4238835A8001687C6 /* Complete.swift in Sources */,
 				A2E3BBEB237AEC3500D88DC0 /* Download.xcdatamodeld in Sources */,
 				A2B9767123743C8F0085705A /* DLListDownloading.swift in Sources */,

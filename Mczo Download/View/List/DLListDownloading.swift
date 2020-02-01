@@ -14,43 +14,43 @@ struct DLListDownloading: View {
     @State private var spin: Bool = false
     
     private func listItem(item: DLTaskGenre) -> some View {
-        HStack {
-            Group {
-                if item.status == DLStatus.wait {
-                    Circle()
-                        .fill(Color.gray)
-                        .rotationEffect(.degrees(self.spin ? 360: 0))
-                        .animation(Animation.linear(duration: 1.1).repeatForever(autoreverses: false))
-                        .onAppear() {
-                            self.spin.toggle()
-                        }
-                }
-                else {
-                    ZStack {
-                        ProgressButtonCircle(endAngleRadians: item.process)
-                            .fill(Color.blue)
-
-                        Group {
-                            if item.status == DLStatus.downloading {
-                                Image(systemName: "pause.fill")
-                            } else if item.status == DLStatus.pause {
-                                Image(systemName: "play.fill")
+        NavigationLink(destination: DLListInfo()) {
+            HStack {
+                Group {
+                    if item.status == DLStatus.wait {
+                        Circle()
+                            .fill(Color.gray)
+                            .rotationEffect(.degrees(self.spin ? 360: 0))
+                            .animation(Animation.linear(duration: 1.1).repeatForever(autoreverses: false))
+                            .onAppear() {
+                                self.spin.toggle()
                             }
+                    }
+                    else {
+                        ZStack {
+                            ProgressButtonCircle(endAngleRadians: item.process)
+                                .fill(Color.blue)
+
+                            Group {
+                                if item.status == DLStatus.downloading {
+                                    Image(systemName: "pause.fill")
+                                } else if item.status == DLStatus.pause {
+                                    Image(systemName: "play.fill")
+                                }
+                            }
+                            .foregroundColor(.blue)
                         }
-                        .foregroundColor(.blue)
                     }
                 }
-            }
-            .frame(width: 45, height: 45)
-            .onTapGesture {
-                if item.status == DLStatus.downloading {
-                    item.pause()
-                } else if item.status == DLStatus.pause {
-                    item.continuance()
+                .frame(width: 45, height: 45)
+                .onTapGesture {
+                    if item.status == DLStatus.downloading {
+                        item.pause()
+                    } else if item.status == DLStatus.pause {
+                        item.continuance()
+                    }
                 }
-            }
             
-            NavigationLink(destination: DLListInfo()) {
                 VStack {
                     HStack {
                         Text("\(item.file.name)")
@@ -69,44 +69,45 @@ struct DLListDownloading: View {
                     .modifier(DLCompositionDescription())
                 }
             }
-        }
-        .contextMenu {
-            if item.status == DLStatus.downloading {
+            .contextMenu {
+                if item.status == DLStatus.downloading {
+                    Button(action: {
+                        item.pause()
+                    }) {
+                        Text("暂停")
+                        Image(systemName: "pause.fill")
+                    }
+                }
+                
+                if item.status == DLStatus.pause {
+                    Button(action: {
+                        item.continuance()
+                    }) {
+                        Text("继续")
+                        Image(systemName: "play.fill")
+                    }
+                }
+                
                 Button(action: {
-                    item.pause()
+                    item.cancel()
                 }) {
-                    Text("暂停")
-                    Image(systemName: "pause.fill")
+                    Text("取消")
+                    Image(systemName: "stop.fill")
+                }
+                
+                Button(action: {
+                    UIPasteboard.general.string = item.url.absoluteString
+                }) {
+                    Text("复制链接")
+                    Image(systemName: "link")
                 }
             }
-            
-            if item.status == DLStatus.pause {
-                Button(action: {
-                    item.continuance()
-                }) {
-                    Text("继续")
-                    Image(systemName: "play.fill")
-                }
-            }
-            
-            Button(action: {
-                item.cancel()
-            }) {
-                Text("取消")
-                Image(systemName: "stop.fill")
-            }
-            
-            Button(action: {
-                UIPasteboard.general.string = item.url.absoluteString
-            }) {
-                Text("复制链接")
-                Image(systemName: "link")
-            }
         }
+        
     }
     
     var body: some View {
-        ForEach(downloadingManage.list) {
+        ForEach(downloadingManage.list, id: \.id) {
             item in
         
             self.listItem(item: item)

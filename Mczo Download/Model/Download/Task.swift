@@ -77,16 +77,16 @@ class DownloadTask {
         print("wc")
     }
     
-    private func getHeader() {
+    var infoTask: URLSessionDataTask!
+    private func getHeader(url: URL, method: String) {
         let sema = DispatchSemaphore(value: 0)
         let request: URLRequest = {
-            var config = URLRequest(url: self.url)
-            config.httpMethod = "HEAD"
-            
+            var config = URLRequest(url: url)
+            config.httpMethod = method
             return config
         }()
         
-        session
+        infoTask = session
             .dataTask(with: request) {
                 data, response, error in
                 
@@ -96,12 +96,16 @@ class DownloadTask {
                     return
                 }
                 
-                guard case let res as HTTPURLResponse = response,
-                    200..<300 ~= res.statusCode else {
-                        print("error code")
-                        sema.signal()
-                        return
+                guard   case let res as HTTPURLResponse = response,
+                        200..<300 ~= res.statusCode
+                else {
+                    if(method == "HEAD") {
+                        return self.getHeader(url: url, method: "GET")
                     }
+                    
+                    sema.signal()
+                    return
+                }
                 
                 var threads: [[Int64]] = Array()
                 let size: Int64 = Int64(res.value(forHTTPHeaderField: "Content-Length")!)!
@@ -126,13 +130,15 @@ class DownloadTask {
                         ext: fileExt)
                 
                 sema.signal()
-            }.resume()
+            }
+        
+        infoTask.resume()
         
         sema.wait()
     }
     
     func header() throws {
-        self.getHeader()
+        self.getHeader(url: self.url, method: "HEAD")
         if self.file.size == nil { throw DownloadError.notNetwork }
         
         self.downloadFileManage = DownloadFileManage(normal: self.file)
@@ -240,6 +246,8 @@ class DownloadTask {
                 thread.cancel()
             }
         }
+        
+        infoTask.cancel()
         
         self.callback?.failure(objects: [
             "name": self.file.name,
