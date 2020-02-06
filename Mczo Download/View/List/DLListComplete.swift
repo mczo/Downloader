@@ -8,65 +8,64 @@
 
 import SwiftUI
 
+private var dateFormatter: DateFormatter {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yy/MM/dd"
+    return dateFormatter
+}
+
 struct DLListComplete: View {
     @EnvironmentObject var downloadingManage: DownloadingManage
     @EnvironmentObject private var globalSetting: GlobalSettings
     @FetchRequest(fetchRequest: ModelComplete.sortedFetchRequest) var completeList: FetchedResults<ModelComplete>
     
     @State private var shareShow: Bool = false
-    
-    private var dateFormatter: DateFormatter {
-        get {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yy/MM/dd"
-            return dateFormatter
-        }
-    }
-    
+        
     var body: some View {
-        ForEach(completeList) {
-            item in
-            
-            VStack {
-                HStack {
-                    Text("\(item.name)")
+        TemplateList(completeList,
+            cover: { item in
+                ZStack {
+                    Circle()
+                        .fill(Color("asset"))
 
-                    Spacer()
+                    Image(systemName: "checkmark")
+                        .resizable()
+                        .frame(width: 15, height: 15)
                 }
-                .modifier(DLCompositionTitle())
+            }, title: { item in
+                Text(item.name)
+            }, meta: { item in
+                Text(item.size.btySize)
+                Text(dateFormatter.string(from: item.createdAt))
 
-                HStack(alignment: .center, spacing: 5) {
-                    Text(item.size.btySize)
-                    Text(self.dateFormatter.string(from: item.createdAt))
-                    
-                    Spacer()
-                    
-                    Text(item.ext)
-                }
-                .modifier(DLCompositionDescription())
-            }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                self.shareShow.toggle()
-            }
-            .sheet(isPresented: self.$shareShow, content: { ActivityViewController(fileOperats: [fileOperat(item)], delete: self.globalSetting.general.complentedDel) })
-            .contextMenu {
-                DLListMenu(item: item, type: .complete)
-            }
-        }
-        .onDelete {
-            indexSet in
+                Spacer()
 
-            guard let index = indexSet.first else { return }
-            
-            let item = self.completeList[index]
-
-            fileOperat(item).del()
-        }
+                Text(item.ext)
+            }, actions: TemplateListActionRandomAccess([
+                (
+                    key: "ellipsis",
+                    value: { index in
+                        print(index)
+                    }
+                ),
+                (
+                    key: "trash",
+                    value: { index in
+                        print(index)
+                    }
+                )
+            ]) )
+        
     }
 }
 
-
+#if DEBUG
+struct DLListComplete_Previews: PreviewProvider {
+    static var previews: some View {
+        DLListComplete()
+    }
+}
+#endif
 
 fileprivate struct ActivityViewController: UIViewControllerRepresentable {
     var activityItems: [URL] = Array()

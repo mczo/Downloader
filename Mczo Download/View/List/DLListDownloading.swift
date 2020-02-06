@@ -11,38 +11,43 @@ import Combine
 
 struct DLListDownloading: View {
     @EnvironmentObject var downloadingManage: DownloadingManage
-    @State private var spin: Bool = false
+    @State private var waitSpin: Bool = false
     
-    private func listItem(item: DLTaskGenre) -> some View {
-        NavigationLink(destination: DLListInfo()) {
-            HStack {
-                Group {
+    var body: some View {
+        TemplateList(downloadingManage.list,
+            cover: { item in
+                ZStack {
                     if item.status == DLStatus.wait {
-                        Circle()
-                            .fill(Color.gray)
-                            .rotationEffect(.degrees(self.spin ? 360: 0))
+                        ArcShape(pct: 0.85)
+                            .foregroundColor(Color("asset"))
+                            .rotationEffect(.degrees(self.waitSpin ? 360: 0))
                             .animation(Animation.linear(duration: 1.1).repeatForever(autoreverses: false))
                             .onAppear() {
-                                self.spin.toggle()
+                                self.waitSpin.toggle()
                             }
-                    }
-                    else {
-                        ZStack {
-                            ProgressButtonCircle(endAngleRadians: item.process)
-                                .fill(Color.blue)
+                    } else {
+                        Circle()
+                            .fill(Color("asset"))
+                            .padding(.all, 4)
 
-                            Group {
-                                if item.status == DLStatus.downloading {
-                                    Image(systemName: "pause.fill")
-                                } else if item.status == DLStatus.pause {
-                                    Image(systemName: "play.fill")
-                                }
+                        ArcShape(pct: item.process)
+                            .foregroundColor(Color("asset"))
+                            .frame(width: 34, height: 34)
+
+                        Group {
+                            if item.status == DLStatus.downloading {
+                                Image(systemName: "pause.fill")
+                                    .resizable()
+                                    .frame(width: 15, height: 15)
+                            } else if item.status == DLStatus.pause {
+                                Image(systemName: "play.fill")
+                                    .resizable()
+                                    .frame(width: 15, height: 15)
                             }
-                            .foregroundColor(.blue)
                         }
                     }
                 }
-                .frame(width: 45, height: 45)
+                .contentShape(Rectangle())
                 .onTapGesture {
                     if item.status == DLStatus.downloading {
                         item.pause()
@@ -50,68 +55,28 @@ struct DLListDownloading: View {
                         item.continuance()
                     }
                 }
-            
-                VStack {
-                    HStack {
-                        Text("\(item.file.name)")
+            }, title: { item in
+                Text(item.file.name)
+            }, meta: { item in
+                Text(item.speed.btySize)
 
-                        Spacer()
-                    }
-                    .modifier(DLCompositionTitle())
+                Spacer()
 
-                    HStack {
-                        Text(item.speed.btySize)
-
-                        Spacer()
-
-                        Text(item.time.timeDec)
+                Text(item.time.timeDec)
+            }, actions: TemplateListActionRandomAccess([
+                (
+                    key: "ellipsis",
+                    value: { index in
+                        print(index)
                     }
-                    .modifier(DLCompositionDescription())
-                }
-            }
-            .contextMenu {
-                if item.status == DLStatus.downloading {
-                    Button(action: {
-                        item.pause()
-                    }) {
-                        Text("暂停")
-                        Image(systemName: "pause.fill")
+                ),
+                (
+                    key: "multiply",
+                    value: { index in
+                        print(index)
                     }
-                }
-                
-                if item.status == DLStatus.pause {
-                    Button(action: {
-                        item.continuance()
-                    }) {
-                        Text("继续")
-                        Image(systemName: "play.fill")
-                    }
-                }
-                
-                Button(action: {
-                    item.cancel()
-                }) {
-                    Text("取消")
-                    Image(systemName: "stop.fill")
-                }
-                
-                Button(action: {
-                    UIPasteboard.general.string = item.url.absoluteString
-                }) {
-                    Text("复制链接")
-                    Image(systemName: "link")
-                }
-            }
-        }
-        
-    }
-    
-    var body: some View {
-        ForEach(downloadingManage.list, id: \.id) {
-            item in
-        
-            self.listItem(item: item)
-        }
+                )
+            ]) )
     }
 }
 
@@ -208,12 +173,12 @@ extension DLTaskGenre {
     var process: CGFloat {
         get {
             guard   let threads: [DownloadThread] = self.threads,
-                let size: Int64 = self.file.size else { return CGFloat((self.file.proportion ?? 0) * 360 - 90) }
+                    let size: Int64 = self.file.size else { return CGFloat(self.file.proportion ?? 0) }
             
             let dl: Int64 = threads.reduce(0) { $0 + ($1.totalBytesWritten ?? 0) }
             let proportion: Float = Float(dl) / Float(size) + (self.file.proportion ?? 0)
 
-            return CGFloat(proportion * 360 - 90)
+            return CGFloat(proportion)
         }
     }
     
@@ -259,38 +224,17 @@ extension DLTaskGenre {
     }
 }
 
-fileprivate struct Circle: Shape, Animatable {
-    var lineWidth: CGFloat = 2
-    var startAngleRadians: CGFloat = -CGFloat.pi / 2
-    var endAngleRadians: CGFloat = 10 * CGFloat.pi
+fileprivate struct ArcShape: Shape {
+    let pct: CGFloat
 
     func path(in rect: CGRect) -> Path {
         var p = Path()
-        let radius = min(rect.width / 2, rect.height / 2) - (lineWidth * 4)
-        p.addArc(center: CGPoint(x: rect.width/2, y: rect.height/2),
-                 radius: radius,
-                 startAngle: Angle(degrees: Double(startAngleRadians)),
-                 endAngle: Angle(degrees: Double(endAngleRadians)),
-                 clockwise: true)
-        let style = StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-        return p.strokedPath(style)
-    }
-}
 
-fileprivate struct ProgressButtonCircle: Shape {
-    var lineWidth: CGFloat = 2
-    var startAngleRadians: CGFloat = -90
-    var endAngleRadians: CGFloat = -90
-    
-    func path(in rect: CGRect) -> Path {
-        var p = Path()
-        let radius = min(rect.width / 2, rect.height / 2) - (lineWidth * 4)
-        p.addArc(center: CGPoint(x: rect.width/2, y: rect.height/2),
-                 radius: radius,
-                 startAngle: Angle(degrees: Double(startAngleRadians)),
-                 endAngle: Angle(degrees: Double(endAngleRadians)),
-                 clockwise: false)
-        let style = StrokeStyle(lineWidth: lineWidth, lineCap: .round)
-        return p.strokedPath(style)
+        p.addArc(center: CGPoint(x: rect.width / 2, y:rect.height / 2),
+                 radius: rect.height / 2,
+                 startAngle: .degrees(-90),
+                 endAngle: .degrees(360 * Double(pct) - 90), clockwise: false)
+
+        return p.strokedPath(.init(lineWidth: 4, lineCap: .round))
     }
 }

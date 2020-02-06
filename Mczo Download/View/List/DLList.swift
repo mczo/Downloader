@@ -12,61 +12,38 @@ struct DLList: View {
     @EnvironmentObject private var downloadingManage: DownloadingManage
     @EnvironmentObject private var globalSetting: GlobalSettings
     
-    @State private var selection: DLStatus = .downloading
-    @State private var DLAddPresented: Bool = false
+    @State private var isAdd: Bool = false
     @State private var isEdit: Bool = false
-    
-    private var selectionView: some View {
-        Section {
-            Picker("下载", selection: $selection) {
-                Text("下载中").tag(DLStatus.downloading)
-                Text("已完成").tag(DLStatus.complete)
-                Text("失败").tag(DLStatus.failure)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .labelsHidden()
-        }
-    }
+    @State private var tabCurrent: DLStatus = .downloading
     
     var body: some View {
-        NavigationView {
-            List {
-                selectionView
+        VStack {
+            Group {
+                TemplateTab(current: $tabCurrent, btnLeft: $isEdit, btnRight: $isAdd)
                 
-                Section {
-                    if selection == DLStatus.downloading {
-                        DLListDownloading()
-                    } else if selection == DLStatus.complete {
-                        DLListComplete()
-                    } else if selection == DLStatus.failure {
-                        DLListFailure()
-                    }
-
+                if (tabCurrent == .downloading) {
+                    DLListDownloading()
+                } else if tabCurrent == .complete {
+                    DLListComplete()
+                } else if tabCurrent == .failure {
+                    DLListFailure()
                 }
             }
-            .navigationBarTitle("下载", displayMode: .automatic)
-            .navigationBarItems(
-                leading: Button(action: {
-                    self.isEdit.toggle()
-                }) {
-                    Text(self.isEdit ? "完成" : "选择")
-                },
-                trailing: Button(action: {
-                    self.DLAddPresented.toggle()
-                }) {
-                    Image(systemName: "plus")
-                }
-            )
-            .sheet(
-                isPresented: self.$DLAddPresented,
-                content: {
-                    DLAdd(downloadingManage: self.downloadingManage, globalSetting: self.globalSetting, DLAddPresented: self.$DLAddPresented)
-                }
-            )
+            .padding(.top, 10)
+            .transition(.move(edge: .leading))
         }
+        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: Alignment.topLeading)
+        .background(Color("bg"))
     }
 }
 
+#if DEBUG
+struct DLList_Previews: PreviewProvider {
+    static var previews: some View {
+        DLList()
+    }
+}
+#endif
 
 enum DLStatus: Int {
     case wait
@@ -76,20 +53,6 @@ enum DLStatus: Int {
     case failure
 }
 
-struct DLCompositionTitle: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .lineLimit(1)
-    }
-}
-
-struct DLCompositionDescription: ViewModifier {
-    func body(content: Content) -> some View {
-        content
-            .foregroundColor(.gray)
-            .font(.callout)
-    }
-}
 
 extension Int64 {
     var btySize: String {

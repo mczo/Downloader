@@ -13,35 +13,41 @@ struct DLListFailure: View {
     @FetchRequest(fetchRequest: ModelFailure.sortedFetchRequest) var failureList: FetchedResults<ModelFailure>
     
     var body: some View {
-        ForEach(failureList) {
-            item in
-            
-            VStack {
-                HStack {
-                    Text("\(item.name)")
+        TemplateList(failureList,
+            cover: { item in
+                ZStack {
+                    Circle()
+                        .fill(Color("asset"))
 
-                    Spacer()
+                    Image(systemName: "multiply")
+                        .resizable()
+                        .frame(width: 15, height: 15)
                 }
-                .modifier(DLCompositionTitle())
-
-                HStack {
-                    Text(item.info)
-
-                    Spacer()
-                }
-                .modifier(DLCompositionDescription())
-            }
-            .contextMenu {
-                DLListMenu(item: item, type: .failure)
-            }
-        }
-        .onDelete {
-            indexSet in
-
-            guard let index = indexSet.first else { return }
-            
-            let item = self.failureList[index]
-            fileOperat(item).del()
-        }
+            }, title: { item in
+                Text(item.name)
+            }, meta: { item in
+                Text(item.info)
+            }, actions: TemplateListActionRandomAccess([
+                (
+                    key: "ellipsis",
+                    value: { index in
+                        print(index)
+                    }
+                ),
+                (
+                    key: "trash",
+                    value: { index in
+                        print(index)
+                    }
+                )
+            ]) )
     }
 }
+
+#if DEBUG
+struct DLListFailure_Previews: PreviewProvider {
+    static var previews: some View {
+        DLListFailure()
+    }
+}
+#endif
