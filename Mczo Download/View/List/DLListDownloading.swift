@@ -14,7 +14,8 @@ struct DLListDownloading: View {
     @State private var waitSpin: Bool = false
     
     var body: some View {
-        TemplateList(downloadingManage.list,
+        TemplateList(
+            downloadingManage.list,
             cover: { item in
                 ZStack {
                     if item.status == DLStatus.wait {

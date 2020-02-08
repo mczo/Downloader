@@ -14,26 +14,34 @@ struct DLList: View {
     
     @State private var isAdd: Bool = false
     @State private var isEdit: Bool = false
-    @State private var tabCurrent: DLStatus = .downloading
+    @State private var tabCurrent: DLStatus = .complete
     
     var body: some View {
-        VStack {
+        TemplateHeader(
+            title: "测试",
+            actions: TemplateListActionRandomAccess([
+                (
+                    key: "plus",
+                    value: {
+                        print("")
+                }
+                )
+            ])
+        ) {
+            
             Group {
-                TemplateTab(current: $tabCurrent, btnLeft: $isEdit, btnRight: $isAdd)
-                
-                if (tabCurrent == .downloading) {
-                    DLListDownloading()
-                } else if tabCurrent == .complete {
+                if (self.tabCurrent == .downloading) {
                     DLListComplete()
-                } else if tabCurrent == .failure {
-                    DLListFailure()
+                } else if self.tabCurrent == .complete {
+                    DLListComplete()
+                } else if self.tabCurrent == .failure {
+                    DLListComplete()
                 }
             }
-            .padding(.top, 10)
             .transition(.move(edge: .leading))
+            
         }
-        .frame(minWidth: 0, maxWidth: .infinity, minHeight: 0, maxHeight: .infinity, alignment: Alignment.topLeading)
-        .background(Color("bg"))
+        
     }
 }
 

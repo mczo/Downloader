@@ -22,7 +22,8 @@ struct DLListComplete: View {
     @State private var shareShow: Bool = false
         
     var body: some View {
-        TemplateList(completeList,
+        TemplateList(
+            completeList,
             cover: { item in
                 ZStack {
                     Circle()

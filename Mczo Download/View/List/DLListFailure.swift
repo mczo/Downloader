@@ -13,7 +13,8 @@ struct DLListFailure: View {
     @FetchRequest(fetchRequest: ModelFailure.sortedFetchRequest) var failureList: FetchedResults<ModelFailure>
     
     var body: some View {
-        TemplateList(failureList,
+        TemplateList(
+            failureList,
             cover: { item in
                 ZStack {
                     Circle()

@@ -15,27 +15,30 @@ struct TemplateList<Data, ContentCover, ContentTitle, ContentMeta>: View where D
     var title: (Data.Element) -> ContentTitle
     var meta: (Data.Element) -> ContentMeta
     var actions: TemplateListActionRandomAccess<String, (Int) -> Void>
+    
     init(_ data: Data, @ViewBuilder cover: @escaping (Data.Element) -> ContentCover, @ViewBuilder title: @escaping (Data.Element) -> ContentTitle, @ViewBuilder meta: @escaping (Data.Element) -> ContentMeta, actions: TemplateListActionRandomAccess<String, (Int) -> Void>) {
-        self.datas = Array(data)
+        self.datas = Array(data)    
+        
         self.cover = cover
         self.title = title
         self.meta = meta
+        
         self.actions = actions
     }
     
     var body: some View {
-        ScrollView(.vertical, showsIndicators: true) {
             VStack(spacing: 14) {
                 Group {
                     ForEach(self.datas.indices) { index in
                         TemplateListItem(index: index, element: self.datas[index], cover: self.cover, title: self.title, meta: self.meta, actions: self.actions)
+                            
                     }
                 }
             }
             .padding(.horizontal)
+            .padding(.top, 14)
             .padding(.bottom, 14)
         }
-    }
 }
 
 private struct TemplateListItem<Element, ContentCover, ContentTitle, ContentMeta>: View where Element: Identifiable, ContentCover: View, ContentTitle: View, ContentMeta: View {
@@ -106,7 +109,7 @@ private struct TemplateListItem<Element, ContentCover, ContentTitle, ContentMeta
                 VStack {
                     self.cover(self.element)
                 }
-                .foregroundColor(Color("list-bg"))
+                .foregroundColor(Color("fg"))
                 .frame(width: 40, height: 40)
                 
                 VStack(spacing: 2) {
@@ -128,12 +131,12 @@ private struct TemplateListItem<Element, ContentCover, ContentTitle, ContentMeta
             }
             .frame(height: 60, alignment: .center)
             .padding(.horizontal, 12)
-            .background(Color("list-bg"))
+            .background(Color("fg"))
             .cornerRadius(13)
             .animation(.interactiveSpring())
             .offset(x: self.translation)
             .offset(x: self.offsetX)
-            .gesture(self.dragGesture)
+            .simultaneousGesture(self.dragGesture)
 //            .contextMenu {
 //                Button(action: {
 //
@@ -173,7 +176,8 @@ struct TemplateList_Previews: PreviewProvider {
     ]
     
     static var previews: some View {
-        TemplateList(self.testList,
+        TemplateList(
+            self.testList,
             cover: { item in
                 ZStack {
                     Circle()
