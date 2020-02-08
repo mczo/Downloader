@@ -8,6 +8,14 @@
 
 import SwiftUI
 
+private var dateFormatter: DateFormatter {
+    get {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yy/MM/dd"
+        return dateFormatter
+    }
+}
+
 struct DLListComplete: View {
     @EnvironmentObject var downloadingManage: DownloadingManage
     @EnvironmentObject private var globalSetting: GlobalSettings
@@ -15,54 +23,51 @@ struct DLListComplete: View {
     
     @State private var shareShow: Bool = false
     
-    private var dateFormatter: DateFormatter {
-        get {
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yy/MM/dd"
-            return dateFormatter
-        }
-    }
-    
     var body: some View {
-        ForEach(completeList) {
-            item in
-            
-            VStack {
-                HStack {
-                    Text("\(item.name)")
+        List {
+            ForEach(completeList) {
+                item in
+                
+                VStack {
+                    HStack {
+                        Text("\(item.name)")
 
-                    Spacer()
+                        Spacer()
+                    }
+                    .modifier(DLCompositionTitle())
+
+                    HStack(alignment: .center, spacing: 5) {
+                        Text(item.size.btySize)
+                        Text(dateFormatter.string(from: item.createdAt))
+                        
+                        Spacer()
+                        
+                        Text(item.ext)
+                    }
+                    .modifier(DLCompositionDescription())
                 }
-                .modifier(DLCompositionTitle())
-
-                HStack(alignment: .center, spacing: 5) {
-                    Text(item.size.btySize)
-                    Text(self.dateFormatter.string(from: item.createdAt))
-                    
-                    Spacer()
-                    
-                    Text(item.ext)
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    self.shareShow.toggle()
                 }
-                .modifier(DLCompositionDescription())
+                .sheet(isPresented: self.$shareShow, content: { ActivityViewController(fileOperats: [fileOperat(item)], delete: self.globalSetting.general.complentedDel) })
+                .contextMenu {
+                    DLListMenu(item: item, type: .complete)
+                }
             }
-            .contentShape(Rectangle())
-            .onTapGesture {
-                self.shareShow.toggle()
-            }
-            .sheet(isPresented: self.$shareShow, content: { ActivityViewController(fileOperats: [fileOperat(item)], delete: self.globalSetting.general.complentedDel) })
-            .contextMenu {
-                DLListMenu(item: item, type: .complete)
-            }
-        }
-        .onDelete {
-            indexSet in
+            .onDelete {
+                indexSet in
 
-            guard let index = indexSet.first else { return }
-            
-            let item = self.completeList[index]
+                guard let index = indexSet.first else { return }
+                
+                let item = self.completeList[index]
 
-            fileOperat(item).del()
+                fileOperat(item).del()
+            }
+
         }
+        .navigationBarTitle(DLStatus.complete.title)
+        
     }
 }
 

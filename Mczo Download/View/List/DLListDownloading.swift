@@ -11,7 +11,10 @@ import Combine
 
 struct DLListDownloading: View {
     @EnvironmentObject var downloadingManage: DownloadingManage
+    @EnvironmentObject private var globalSetting: GlobalSettings
     @State private var spin: Bool = false
+    
+    @State private var DLAddPresented: Bool = false
     
     private func listItem(item: DLTaskGenre) -> some View {
         NavigationLink(destination: DLListInfo()) {
@@ -107,11 +110,28 @@ struct DLListDownloading: View {
     }
     
     var body: some View {
-        ForEach(downloadingManage.list, id: \.id) {
-            item in
-        
-            self.listItem(item: item)
+        List {
+            ForEach(downloadingManage.list, id: \.id) {
+                item in
+            
+                self.listItem(item: item)
+            }
         }
+        .navigationBarTitle(DLStatus.downloading.title)
+        .navigationBarItems(
+            trailing: Button(action: {
+                self.DLAddPresented.toggle()
+            }) {
+                Image(systemName: "plus")
+            }
+        )
+        .sheet(
+            isPresented: self.$DLAddPresented,
+            content: {
+                DLAdd(downloadingManage: self.downloadingManage, globalSetting: self.globalSetting, DLAddPresented: self.$DLAddPresented)
+            }
+        )
+
     }
 }
 

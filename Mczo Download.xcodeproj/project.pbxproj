@@ -50,6 +50,7 @@
 		A2A6D59A23E28CB900358C63 /* DLListMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListMenu.swift; sourceTree = "<group>"; };
 		A2B81ED423A50808004FC0A4 /* DLListInfo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListInfo.swift; sourceTree = "<group>"; };
 		A2B9767023743C8F0085705A /* DLListDownloading.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLListDownloading.swift; sourceTree = "<group>"; };
+		A2DAFD9223EE9C2700EAE990 /* Mczo Download copy-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; name = "Mczo Download copy-Info.plist"; path = "/Users/wirspe/Documents/Mczo Download/Mczo Download copy-Info.plist"; sourceTree = "<absolute>"; };
 		A2DEFFCD234E3AD400792564 /* DLList.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLList.swift; sourceTree = "<group>"; };
 		A2DEFFD2234F5F6900792564 /* DLAdd.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DLAdd.swift; sourceTree = "<group>"; };
 		A2DEFFD72350C8B200792564 /* Download.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Download.swift; sourceTree = "<group>"; };
@@ -78,6 +79,7 @@
 			children = (
 				A2179B33234E333B00C78E34 /* Mczo Download */,
 				A2179B32234E333B00C78E34 /* Products */,
+				A2DAFD9223EE9C2700EAE990 /* Mczo Download copy-Info.plist */,
 			);
 			sourceTree = "<group>";
 		};

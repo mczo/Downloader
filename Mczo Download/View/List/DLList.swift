@@ -15,36 +15,26 @@ struct DLList: View {
     @State private var selection: DLStatus = .downloading
     @State private var DLAddPresented: Bool = false
     @State private var isEdit: Bool = false
-    
-    private var selectionView: some View {
-        Section {
-            Picker("下载", selection: $selection) {
-                Text("下载中").tag(DLStatus.downloading)
-                Text("已完成").tag(DLStatus.complete)
-                Text("失败").tag(DLStatus.failure)
-            }
-            .pickerStyle(SegmentedPickerStyle())
-            .labelsHidden()
-        }
-    }
-    
+        
     var body: some View {
         NavigationView {
-            List {
-                selectionView
-                
+            Form {
                 Section {
-                    if selection == DLStatus.downloading {
-                        DLListDownloading()
-                    } else if selection == DLStatus.complete {
-                        DLListComplete()
-                    } else if selection == DLStatus.failure {
-                        DLListFailure()
+                    NavigationLink(destination: DLListDownloading()) {
+                        Text(DLStatus.downloading.title)
+                    }
+                    
+                    NavigationLink(destination: DLListComplete()) {
+                        Text(DLStatus.complete.title)
+                    }
+
+                    NavigationLink(destination: DLListFailure()) {
+                        Text(DLStatus.failure.title)
                     }
 
                 }
             }
-            .navigationBarTitle("下载", displayMode: .automatic)
+            .navigationBarTitle("下载")
             .navigationBarItems(
                 leading: Button(action: {
                     self.isEdit.toggle()
@@ -64,6 +54,7 @@ struct DLList: View {
                 }
             )
         }
+        
     }
 }
 
@@ -75,6 +66,24 @@ enum DLStatus: Int {
     case complete
     case failure
 }
+
+extension DLStatus {
+    var title: String {
+        switch self {
+        case .wait:
+            return "等待中"
+        case .downloading:
+            return "下载中"
+        case .pause:
+            return "已下载"
+        case .complete:
+            return "已完成"
+        case .failure:
+            return "失败"
+        }
+    }
+}
+
 
 struct DLCompositionTitle: ViewModifier {
     func body(content: Content) -> some View {

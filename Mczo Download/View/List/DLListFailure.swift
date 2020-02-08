@@ -13,35 +13,38 @@ struct DLListFailure: View {
     @FetchRequest(fetchRequest: ModelFailure.sortedFetchRequest) var failureList: FetchedResults<ModelFailure>
     
     var body: some View {
-        ForEach(failureList) {
-            item in
-            
-            VStack {
-                HStack {
-                    Text("\(item.name)")
+        List {
+            ForEach(failureList) {
+                item in
+                
+                VStack {
+                    HStack {
+                        Text("\(item.name)")
 
-                    Spacer()
+                        Spacer()
+                    }
+                    .modifier(DLCompositionTitle())
+
+                    HStack {
+                        Text(item.info)
+
+                        Spacer()
+                    }
+                    .modifier(DLCompositionDescription())
                 }
-                .modifier(DLCompositionTitle())
-
-                HStack {
-                    Text(item.info)
-
-                    Spacer()
+                .contextMenu {
+                    DLListMenu(item: item, type: .failure)
                 }
-                .modifier(DLCompositionDescription())
             }
-            .contextMenu {
-                DLListMenu(item: item, type: .failure)
+            .onDelete {
+                indexSet in
+
+                guard let index = indexSet.first else { return }
+                
+                let item = self.failureList[index]
+                fileOperat(item).del()
             }
         }
-        .onDelete {
-            indexSet in
-
-            guard let index = indexSet.first else { return }
-            
-            let item = self.failureList[index]
-            fileOperat(item).del()
-        }
+        .navigationBarTitle(DLStatus.failure.title)
     }
 }
